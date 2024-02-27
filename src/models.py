@@ -52,8 +52,8 @@ class Store(Base):
     __tablename__ = "stores"
     name: Mapped[str] = mapped_column(String(length=20), unique=True, index=True, nullable=False)
     introduction: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True, nullable=False)
-    district_id: Mapped[int] = mapped_column(ForeignKey("districts.id"), unique=False, index=False, nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=True, index=True, nullable=False)
+    district_id: Mapped[int] = mapped_column(ForeignKey("districts.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
 
 class Item(Base):
@@ -73,7 +73,7 @@ class ItemOptionTitle(Base):
 class ItemOption(Base):
     __tablename__ = "item_options"
     name: Mapped[str] = mapped_column(String(length=20), unique=False, index=False, nullable=False)
-    item_option_title_id: Mapped[int] = ForeignKey("item_option_titles.id", ondelete="CASCADE", onupdate="CASCADE")
+    item_option_title_id: Mapped[int] = mapped_column(ForeignKey("item_option_titles.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     remaining: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=0)
 
 
