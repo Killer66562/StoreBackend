@@ -5,7 +5,7 @@ from datetime import datetime
 
 from typing import Literal
 
-from enums import Gender
+from enums import OrderStatus
 
 
 class Base(DeclarativeBase):
@@ -31,21 +31,19 @@ class Verification(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=True, index=True, nullable=False)
 
 
-class UserData(Base):
-    __tablename__ = "user_datas"
-    name: Mapped[str] = mapped_column(String(length=20), unique=False, index=False, nullable=False)
-    gender: Mapped[Literal[Gender.MALE, Gender.FEMALE, Gender.OTHER]] = mapped_column(Integer, unique=False, index=False, nullable=False)
-
-
 class City(Base):
     __tablename__ = "cities"
     name: Mapped[str] = mapped_column(String(length=10), unique=False, index=False, nullable=False)
+
+    districts: Mapped[list["District"]] = relationship("District", primaryjoin="City.id == District.city_id", uselist=True)
 
 
 class District(Base):
     __tablename__ = "districts"
     name: Mapped[str] = mapped_column(String(length=10), unique=False, index=False, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+
+    city: Mapped["City"] = relationship("City", primaryjoin="City.id == District.city_id", uselist=False)
 
 
 class Store(Base):
@@ -55,6 +53,10 @@ class Store(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=True, index=True, nullable=False)
     district_id: Mapped[int] = mapped_column(ForeignKey("districts.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
+    owner: Mapped["User"] = relationship("User", primaryjoin="User.id == Store.user_id", uselist=False)
+    district: Mapped["District"] = relationship("District", primaryjoin="District.id == Store.district_id", uselist=False)
+    items: Mapped[list["Item"]] = relationship("Item", primaryjoin="Store.id == Item.store_id", uselist=False)
+
 
 class Item(Base):
     __tablename__ = "items"
@@ -62,11 +64,16 @@ class Item(Base):
     introduction: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
     store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
+    store: Mapped["Store"] = relationship("Store", primaryjoin="Store.id == Item.store_id", uselist=False)
+    option_titles: Mapped[list["ItemOptionTitle"]] = relationship("ItemOptionTitle", primaryjoin="Item.id == ItemOptionTitle.item_id", uselist=True)
+
 
 class ItemOptionTitle(Base):
     __tablename__ = "item_option_titles"
     name: Mapped[str] = mapped_column(String(length=20), unique=False, index=False, nullable=False)
     item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+
+    options: Mapped[list["ItemOption"]] = relationship("ItemOption", primaryjoin="ItemOptionTitle.id == ItemOption.item_option_title_id", uselist=True)
 
 
 class ItemOption(Base):
@@ -80,14 +87,17 @@ class ItemOption(Base):
 class Order(Base):
     __tablename__ = "orders"
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
-    status: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
-
-
-class OrderDetail(Base):
-    __tablename__ = "order_details"
-    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=True, nullable=False)
     item_option_id: Mapped[int] = mapped_column(ForeignKey("item_options.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
+    status: Mapped[
+        Literal[
+            OrderStatus.NOT_DELIVERED, 
+            OrderStatus.DELIVERED, 
+            OrderStatus.PROCESSING, 
+            OrderStatus.ARRIVED, 
+            OrderStatus.DONE
+        ]
+    ] = mapped_column(Integer, unique=False, index=False, nullable=False, default=OrderStatus.NOT_DELIVERED.value)
 
 
 class CartItemDetail(Base):
@@ -95,3 +105,10 @@ class CartItemDetail(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     item_option_id: Mapped[int] = mapped_column(ForeignKey("item_options.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    content: Mapped[str] = mapped_column(String(length=200), unique=False, index=False, nullable=False)
