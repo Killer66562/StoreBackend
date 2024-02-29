@@ -100,8 +100,8 @@ class Order(Base):
     ] = mapped_column(Integer, unique=False, index=False, nullable=False, default=OrderStatus.NOT_DELIVERED.value)
 
 
-class CartItemDetail(Base):
-    __tablename__ = "cart_item_details"
+class CartItem(Base):
+    __tablename__ = "cart_items"
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     item_option_id: Mapped[int] = mapped_column(ForeignKey("item_options.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
