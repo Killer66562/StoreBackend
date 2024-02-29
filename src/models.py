@@ -61,7 +61,6 @@ class Item(Base):
     name: Mapped[str] = mapped_column(String(length=50), unique=False, index=False, nullable=False)
     introduction: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
     store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
-    price: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
 
 
 class ItemOptionTitle(Base):
@@ -75,17 +74,24 @@ class ItemOption(Base):
     name: Mapped[str] = mapped_column(String(length=20), unique=False, index=False, nullable=False)
     item_option_title_id: Mapped[int] = mapped_column(ForeignKey("item_option_titles.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     remaining: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=0)
+    price: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
 
 
 class Order(Base):
     __tablename__ = "orders"
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    status: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
+
+
+class OrderDetail(Base):
+    __tablename__ = "order_details"
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=True, nullable=False)
     item_option_id: Mapped[int] = mapped_column(ForeignKey("item_options.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
 
 
-class CartItem(Base):
-    __tablename__ = "cart_items"
+class CartItemDetail(Base):
+    __tablename__ = "cart_item_details"
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     item_option_id: Mapped[int] = mapped_column(ForeignKey("item_options.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
