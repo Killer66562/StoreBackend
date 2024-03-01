@@ -35,7 +35,7 @@ class City(Base):
     __tablename__ = "cities"
     name: Mapped[str] = mapped_column(String(length=10), unique=False, index=False, nullable=False)
 
-    districts: Mapped[list["District"]] = relationship("District", primaryjoin="City.id == District.city_id", uselist=True)
+    districts: Mapped[list["District"]] = relationship("District", primaryjoin="City.id == District.city_id", uselist=True, back_populates="city")
 
 
 class District(Base):
@@ -43,7 +43,7 @@ class District(Base):
     name: Mapped[str] = mapped_column(String(length=10), unique=False, index=False, nullable=False)
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
-    city: Mapped["City"] = relationship("City", primaryjoin="City.id == District.city_id", uselist=False)
+    city: Mapped["City"] = relationship("City", primaryjoin="City.id == District.city_id", uselist=False, back_populates="districts")
 
 
 class Store(Base):

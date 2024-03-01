@@ -1,4 +1,14 @@
+from typing import Literal
 from pydantic import BaseModel
+
+from datetime import datetime
+
+from enums import OrderStatus
+
+
+class BaseSchema(BaseModel):
+    id: int
+    created_at: datetime
 
 
 class RegisterSchema(BaseModel):
@@ -32,6 +42,89 @@ class AdminCUStoreSchema(CUStoreSchema):
     user_id: int
 
 
+class CUItemSchema(BaseModel):
+    name: str
+    introduction: str
+    store_id: int
+
+
+class CUItemOptionTitleScheam(BaseModel):
+    name: str
+    item_id: int
+
+
+class CUItemOptionSchema(BaseModel):
+    name: str
+    item_option_title_id: int
+    remaining: int
+    price: int
+
+
 class CUOrderSchema(BaseModel):
     item_option_id: int
     count: int
+
+
+class CUCartItemSchema(BaseModel):
+    user_id: int
+    item_option_id: int
+    count: int
+
+
+class CUCommentSchema(BaseModel):
+    item_id: int
+    content: str
+
+
+class PCitySchema(BaseSchema):
+    name: str
+
+
+class PDistrictSchema(BaseSchema):
+    name: str
+    city_id: int
+
+
+class CitySchema(PCitySchema):
+    districts: list[PDistrictSchema] = []
+
+
+class DistrictSchema(PDistrictSchema):
+    city: PCitySchema
+
+
+class PStoreSchema(BaseModel):
+    name: str
+    introduction: str
+    user_id: int
+    district_id: int
+
+
+class PItemSchema(BaseModel):
+    name: str
+    introduction: str
+    store_id: int
+
+
+class PItemOptionTitleSchema(BaseModel):
+    name: str
+    item_id: int
+
+
+class PItemOptionSchema(BaseModel):
+    name: str
+    item_option_title_id: int
+    count: int
+    status: Literal[OrderStatus.NOT_DELIVERED, OrderStatus.DELIVERED, OrderStatus.PROCESSING, OrderStatus.ARRIVED, OrderStatus.DONE]
+
+
+class PCartItemSchema(BaseModel):
+    user_id: int
+    item_option_id: int
+    count: int
+
+
+class PCommentSchema(BaseModel):
+    user_id: int
+    item_id: int
+    content: str

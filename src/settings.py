@@ -8,23 +8,23 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = 8000
 
-    db_connection: str = "sqlite:///app.sqlite3"
+    db_connection: str = "sqlite:///database.sqlite3"
 
-    mail_username: str = ""
-    mail_password: str = ""
-    mail_from: str = ""
-    mail_port: int = 25
-    mail_server: str = ""
-    mail_starttls: bool = False
-    mail_ssl_tls: bool = False
-    mail_use_credentials: bool = False
-    mail_validate_certs: bool = False
+    #mail_username: str = ""
+    #mail_password: str = ""
+    #mail_from: str = ""
+    #mail_port: int = 25
+    #mail_server: str = ""
+    #mail_starttls: bool = False
+    #mail_ssl_tls: bool = False
+    #mail_use_credentials: bool = False
+    #mail_validate_certs: bool = False
 
     model_config = SettingsConfigDict(env_file=".env")
 
-    secret_key: str
+    secret_key: str = "ABC"
     algorithm: str = "SHA256"
-    access_token_expire_minutes: int
+    access_token_expire_minutes: int = 30
     
 
 settings = Settings()
