@@ -36,6 +36,7 @@ class CUStoreSchema(BaseModel):
     name: str
     introduction: str
     district_id: int
+    user_id: int
 
 
 class AdminCUStoreSchema(CUStoreSchema):
@@ -48,7 +49,7 @@ class CUItemSchema(BaseModel):
     store_id: int
 
 
-class CUItemOptionTitleScheam(BaseModel):
+class CUItemOptionTitleSchema(BaseModel):
     name: str
     item_id: int
 
@@ -63,6 +64,10 @@ class CUItemOptionSchema(BaseModel):
 class CUOrderSchema(BaseModel):
     item_option_id: int
     count: int
+
+
+class UOrderStatusSchema(BaseModel):
+    status: Literal[OrderStatus.NOT_DELIVERED, OrderStatus.DELIVERED, OrderStatus.PROCESSING, OrderStatus.ARRIVED, OrderStatus.DONE]
 
 
 class CUCartItemSchema(BaseModel):
