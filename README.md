@@ -12,10 +12,12 @@
 9. 輸入 "alembic upgrade head" 初始化資料庫 (測試環境使用sqlite3)
 10. 輸入 "python main.py" 啟動專案
 
+## 測試方式
+1. 使用Postman對想測試的端點發送請求
+2. 自己寫一個簡單的前端串接
+### 若要測試須登入才能使用的功能，請記得將從登入端點(/login)拿到的access_token加到Headers的Authorization中再進行請求，否則會無權訪問。
+
 ## 待辦事項
 + 構想API端點路徑
 + 確認是否有需要新增的Model
 + 實作所有API端點
-
-## Branch lock test
-### This is a message
