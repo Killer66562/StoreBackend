@@ -16,3 +16,5 @@
 + 構想API端點路徑
 + 確認是否有需要新增的Model
 + 實作所有API端點
+
+## Branch lock test
