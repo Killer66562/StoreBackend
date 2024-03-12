@@ -9,6 +9,7 @@ from sqlalchemy import or_
 from dependencies import get_db, get_password_hash, authenticate_user, create_token
 
 from routes import user as user_route
+from routes import admin as admin_route
 
 from models import User
 
@@ -17,6 +18,7 @@ from schemas.general import LoginSchema, RegisterSchema, TokenSchema, UserSchema
 
 app = FastAPI()
 app.include_router(user_route.router)
+app.include_router(admin_route.router)
 
 @app.get("/")
 def hello():
@@ -35,7 +37,7 @@ def register(data: RegisterSchema, db: Session = Depends(get_db)):
 def login(data: LoginSchema, db: Session = Depends(get_db)):
     user = authenticate_user(db=db, username=data.username, password=data.password)
     if not user:
-        return JSONResponse(content={"message": "使用者名稱或密碼錯誤"})
+        return JSONResponse(content={"message": "使用者名稱或密碼錯誤"}, status_code=401)
     access_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(hours=1), "for": "access"})
     refresh_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(days=3600), "for": "refresh"})
     return {"access_token": access_token, "refresh_token": refresh_token}

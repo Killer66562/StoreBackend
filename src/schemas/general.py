@@ -29,3 +29,19 @@ class LoginSchema(BaseModel):
 class TokenSchema(BaseModel):
     access_token: str
     refresh_token: str
+
+
+class CitySchema(BaseResourceSchema):
+    name: str
+
+
+class DistrictSchema(BaseResourceSchema):
+    name: str
+    city_id: int
+
+
+class StoreSchema(BaseResourceSchema):
+    name: str
+    introduction: str
+    user_id: int
+    district_id: int

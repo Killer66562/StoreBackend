@@ -7,6 +7,7 @@ from schemas.user import CUStore
 from dependencies import get_current_user, get_db
 from exceptions import DuplicateModelException
 
+
 router = APIRouter(prefix="/store")
 
 #取得使用者的商店
