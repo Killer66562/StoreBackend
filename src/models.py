@@ -23,7 +23,8 @@ class User(Base):
 
     verification: Mapped["Verification"] = relationship("Verification", primaryjoin="User.id == Verification.user_id", uselist=False, back_populates="user")
     store: Mapped["Store"] = relationship("Store", primaryjoin="User.id == Store.user_id", uselist=False, back_populates="owner")
-    orders: Mapped[list["Order"]] = relationship("Order", primaryjoin="User.id == Order.user_id", uselist=True, back_populates="user")
+    orders: Mapped[list["Order"]] = relationship("Order", primaryjoin="User.id == Order.user_id", uselist=True, back_populates="owner")
+    cart_items: Mapped[list["CartItem"]] = relationship("CartItem", primaryjoin="User.id == CartItem.user_id", uselist=True, back_populates="owner")
 
 
 class Verification(Base):
@@ -31,6 +32,8 @@ class Verification(Base):
     code: Mapped[str] = mapped_column(String(length=5), unique=False, index=False, nullable=False)
     last_request: Mapped[datetime] = mapped_column(DateTime, unique=False, index=False, nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=True, index=True, nullable=False)
+
+    user: Mapped["User"] = relationship("User", primaryjoin="User.id == Verification.user_id", uselist=False, back_populates="verification")
 
 
 class City(Base):
@@ -46,7 +49,7 @@ class District(Base):
     city_id: Mapped[int] = mapped_column(ForeignKey("cities.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
     city: Mapped["City"] = relationship("City", primaryjoin="City.id == District.city_id", uselist=False, back_populates="districts")
-    stores: Mapped[list["Store"]] = relationship("Store", primaryjoin="Store.district_id == District.id", uselist=True, back_populates="stores")
+    stores: Mapped[list["Store"]] = relationship("Store", primaryjoin="Store.district_id == District.id", uselist=True, back_populates="district")
 
 
 class Store(Base):
@@ -58,7 +61,7 @@ class Store(Base):
 
     owner: Mapped["User"] = relationship("User", primaryjoin="User.id == Store.user_id", uselist=False, back_populates="store")
     district: Mapped["District"] = relationship("District", primaryjoin="District.id == Store.district_id", uselist=False, back_populates="stores")
-    items: Mapped[list["Item"]] = relationship("Item", primaryjoin="Store.id == Item.store_id", uselist=False)
+    items: Mapped[list["Item"]] = relationship("Item", primaryjoin="Store.id == Item.store_id", uselist=False, back_populates="store")
 
 
 class Item(Base):
@@ -67,7 +70,7 @@ class Item(Base):
     introduction: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
     store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
-    store: Mapped["Store"] = relationship("Store", primaryjoin="Store.id == Item.store_id", uselist=False)
+    store: Mapped["Store"] = relationship("Store", primaryjoin="Store.id == Item.store_id", uselist=False, back_populates="items")
     option_titles: Mapped[list["ItemOptionTitle"]] = relationship("ItemOptionTitle", primaryjoin="Item.id == ItemOptionTitle.item_id", uselist=True, back_populates="item")
 
 
@@ -107,7 +110,7 @@ class Order(Base):
     ] = mapped_column(Integer, unique=False, index=False, nullable=False, default=OrderStatus.NOT_DELIVERED.value)
 
     owner: Mapped["User"] = relationship("User", primaryjoin="User.id == Order.user_id", uselist=False, back_populates="orders")
-    item_option: Mapped["ItemOption"] = relationship("itemOption", primaryjoin="ItemOption.id == Order.item_option_id", uselist=False, back_populates="orders")
+    item_option: Mapped["ItemOption"] = relationship("ItemOption", primaryjoin="ItemOption.id == Order.item_option_id", uselist=False, back_populates="orders")
 
 
 class CartItem(Base):
