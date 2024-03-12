@@ -37,11 +37,11 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-async def get_user(db: Session, username: str):
+def get_user(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
-async def authenticate_user(db: Session, username: str, password: str):
-    user = await get_user(db=db, username=username)
+def authenticate_user(db: Session, username: str, password: str):
+    user = get_user(db=db, username=username)
     if not user:
         return False
     if not verify_password(password, user.password):

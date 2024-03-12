@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse
 import uvicorn
 
@@ -5,13 +6,13 @@ from fastapi import Depends, FastAPI
 
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from dependencies import get_db, get_password_hash, verify_password, get_user, create_token
+from dependencies import get_db, get_password_hash, authenticate_user, create_token
 
 from routes import user as user_route
 
 from models import User
 
-from schemas.general import LoginSchema, RegisterSchema, UserSchema
+from schemas.general import LoginSchema, RegisterSchema, TokenSchema, UserSchema
 
 
 app = FastAPI()
@@ -30,13 +31,14 @@ def register(data: RegisterSchema, db: Session = Depends(get_db)):
     db.commit()
     return user
 
-@app.post("/login")
+@app.post("/login", response_model=TokenSchema)
 def login(data: LoginSchema, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == data.username).first()
+    user = authenticate_user(db=db, username=data.username, password=data.password)
     if not user:
-        return
-    if not verify_password(data.password, user.password):
-        return
+        return JSONResponse(content={"message": "使用者名稱或密碼錯誤"})
+    access_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(hours=1), "for": "access"})
+    refresh_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(days=3600), "for": "refresh"})
+    return {"access_token": access_token, "refresh_token": refresh_token}
 
 if __name__ == '__main__':
     uvicorn.run("main:app", reload=True)
