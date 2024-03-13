@@ -54,4 +54,23 @@ class ItemSchema(BaseResourceSchema):
 
 class ItemOptionTitleSchema(BaseResourceSchema):
     name: str
-    store_id: int
+    item_id: int
+
+
+class ItemOptionSchema(BaseResourceSchema):
+    name: str
+    price: int
+    remaining: int
+    item_option_title_id: int
+
+
+class FullItemOptionTitleSchema(ItemOptionTitleSchema):
+    options: list[ItemOptionSchema] = []
+
+
+class FullItemSchema(ItemSchema):
+    option_titles: list[FullItemOptionTitleSchema] = []
+
+
+class FullStoreSchema(StoreSchema):
+    items: list[FullItemSchema] = []

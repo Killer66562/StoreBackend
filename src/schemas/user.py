@@ -19,4 +19,4 @@ class CUItemOptionTitleSchema(BaseModel):
 class CUItemOptionSchema(BaseModel):
     name: str
     price: int
-    count: int
+    remaining: int
