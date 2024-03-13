@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse
+
 import uvicorn
 
 from fastapi import Depends, FastAPI
 
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from dependencies import get_db, get_password_hash, authenticate_user, create_token
+from dependencies import get_db, get_password_hash, authenticate_user, create_token, get_current_user_by_refresh_token
 
 from routes import user as user_route
 from routes import admin as admin_route
@@ -38,6 +39,12 @@ def login(data: LoginSchema, db: Session = Depends(get_db)):
     user = authenticate_user(db=db, username=data.username, password=data.password)
     if not user:
         return JSONResponse(content={"message": "使用者名稱或密碼錯誤"}, status_code=401)
+    access_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(hours=1), "for": "access"})
+    refresh_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(days=3600), "for": "refresh"})
+    return {"access_token": access_token, "refresh_token": refresh_token}
+
+@app.post("/refresh", response_model=TokenSchema)
+def login(user: User = Depends(get_current_user_by_refresh_token)):
     access_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(hours=1), "for": "access"})
     refresh_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(days=3600), "for": "refresh"})
     return {"access_token": access_token, "refresh_token": refresh_token}

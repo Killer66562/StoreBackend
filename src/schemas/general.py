@@ -45,3 +45,13 @@ class StoreSchema(BaseResourceSchema):
     introduction: str
     user_id: int
     district_id: int
+
+class ItemSchema(BaseResourceSchema):
+    name: str
+    introduction: str
+    store_id: int
+
+
+class ItemOptionTitleSchema(BaseResourceSchema):
+    name: str
+    store_id: int

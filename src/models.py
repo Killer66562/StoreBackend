@@ -61,7 +61,7 @@ class Store(Base):
 
     owner: Mapped["User"] = relationship("User", primaryjoin="User.id == Store.user_id", uselist=False, back_populates="store")
     district: Mapped["District"] = relationship("District", primaryjoin="District.id == Store.district_id", uselist=False, back_populates="stores")
-    items: Mapped[list["Item"]] = relationship("Item", primaryjoin="Store.id == Item.store_id", uselist=False, back_populates="store")
+    items: Mapped[list["Item"]] = relationship("Item", primaryjoin="Store.id == Item.store_id", uselist=True, back_populates="store")
 
 
 class Item(Base):
