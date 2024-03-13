@@ -125,7 +125,7 @@ def get_user_item_item_option_titles(item_id: int, item_option_title_id: int, da
 @router.delete("/items/{item_id}/item_option_titles/{item_option_title_id}", status_code=204)
 def get_user_item_item_option_titles(item_id: int, item_option_title_id: int, data: CUItemOptionTitleSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.store:
-        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=409)
+        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
     item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
     if not item:
         return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
