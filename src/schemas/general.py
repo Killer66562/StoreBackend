@@ -46,32 +46,19 @@ class StoreSchema(BaseResourceSchema):
     user_id: int
     district_id: int
 
+
 class ItemSchema(BaseResourceSchema):
     name: str
     introduction: str
+    count: int
     price: int
     store_id: int
 
 
-class ItemOptionTitleSchema(BaseResourceSchema):
-    name: str
-    item_id: int
-
-
-class ItemOptionSchema(BaseResourceSchema):
-    name: str
-    additional_price: int
-    remaining: int
-    item_option_title_id: int
-
-
-class FullItemOptionTitleSchema(ItemOptionTitleSchema):
-    options: list[ItemOptionSchema] = []
-
-
-class FullItemSchema(ItemSchema):
-    option_titles: list[FullItemOptionTitleSchema] = []
-
-
 class FullStoreSchema(StoreSchema):
-    items: list[FullItemSchema] = []
+    items: list[ItemSchema] = []
+
+
+class OrderSchema(BaseResourceSchema):
+    item_id: int
+    count: int

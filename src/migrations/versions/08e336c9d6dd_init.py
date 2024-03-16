@@ -1,8 +1,8 @@
 """Init
 
-Revision ID: 3634623894dc
+Revision ID: 08e336c9d6dd
 Revises: 
-Create Date: 2024-03-16 14:08:56.297386
+Create Date: 2024-03-16 15:32:21.752104
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '3634623894dc'
+revision: str = '08e336c9d6dd'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -77,6 +77,7 @@ def upgrade() -> None:
     op.create_table('items',
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('introduction', sa.String(length=500), nullable=False),
+    sa.Column('count', sa.Integer(), nullable=False),
     sa.Column('price', sa.Integer(), nullable=False),
     sa.Column('store_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -85,6 +86,17 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_items_id'), 'items', ['id'], unique=True)
+    op.create_table('cart_items',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('item_id', sa.Integer(), nullable=False),
+    sa.Column('count', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['item_id'], ['items.id'], onupdate='CASCADE', ondelete='RESTRICT'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_cart_items_id'), 'cart_items', ['id'], unique=True)
     op.create_table('comments',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('item_id', sa.Integer(), nullable=False),
@@ -96,39 +108,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_comments_id'), 'comments', ['id'], unique=True)
-    op.create_table('item_option_titles',
-    sa.Column('name', sa.String(length=20), nullable=False),
-    sa.Column('item_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['item_id'], ['items.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_item_option_titles_id'), 'item_option_titles', ['id'], unique=True)
-    op.create_table('item_options',
-    sa.Column('name', sa.String(length=20), nullable=False),
-    sa.Column('item_option_title_id', sa.Integer(), nullable=False),
-    sa.Column('item_option_id', sa.Integer(), nullable=True),
-    sa.Column('remaining', sa.Integer(), nullable=False),
-    sa.Column('additional_price', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['item_option_id'], ['item_options.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['item_option_title_id'], ['item_option_titles.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_item_options_id'), 'item_options', ['id'], unique=True)
-    op.create_table('cart_items',
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('item_option_id', sa.Integer(), nullable=False),
-    sa.Column('count', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['item_option_id'], ['item_options.id'], onupdate='CASCADE', ondelete='RESTRICT'),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_cart_items_id'), 'cart_items', ['id'], unique=True)
     op.create_table('orders',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('item_id', sa.Integer(), nullable=False),
@@ -136,38 +115,22 @@ def upgrade() -> None:
     sa.Column('status', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['item_id'], ['item_options.id'], onupdate='CASCADE', ondelete='RESTRICT'),
+    sa.ForeignKeyConstraint(['item_id'], ['items.id'], onupdate='CASCADE', ondelete='RESTRICT'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_orders_id'), 'orders', ['id'], unique=True)
-    op.create_table('order_details',
-    sa.Column('order_id', sa.Integer(), nullable=False),
-    sa.Column('item_option_id', sa.Integer(), nullable=False),
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['item_option_id'], ['item_options.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['order_id'], ['orders.id'], onupdate='CASCADE', ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_order_details_id'), 'order_details', ['id'], unique=True)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_index(op.f('ix_order_details_id'), table_name='order_details')
-    op.drop_table('order_details')
     op.drop_index(op.f('ix_orders_id'), table_name='orders')
     op.drop_table('orders')
-    op.drop_index(op.f('ix_cart_items_id'), table_name='cart_items')
-    op.drop_table('cart_items')
-    op.drop_index(op.f('ix_item_options_id'), table_name='item_options')
-    op.drop_table('item_options')
-    op.drop_index(op.f('ix_item_option_titles_id'), table_name='item_option_titles')
-    op.drop_table('item_option_titles')
     op.drop_index(op.f('ix_comments_id'), table_name='comments')
     op.drop_table('comments')
+    op.drop_index(op.f('ix_cart_items_id'), table_name='cart_items')
+    op.drop_table('cart_items')
     op.drop_index(op.f('ix_items_id'), table_name='items')
     op.drop_table('items')
     op.drop_index(op.f('ix_stores_user_id'), table_name='stores')

@@ -9,7 +9,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from models import Base, User, City, District, Store, Item, ItemOptionTitle, ItemOption, Order, CartItem, Comment
+from models import Base, User, City, District, Store, Item, Order, CartItem, Comment
 
 from exceptions import UnauthenticatedException, ModelNotFoundException, PermissionException
 
@@ -109,12 +109,6 @@ def get_store(store_id: int, db: Session = Depends(get_db)):
 
 def get_item(item_id: int, db: Session = Depends(get_db)):
     return get_obj(Item, item_id, db)
-
-def get_item_option_title(item_option_title_id: int, db: Session = Depends(get_db)):
-    return get_obj(ItemOptionTitle, item_option_title_id, db)
-
-def get_item_option(item_option_id: int, db: Session = Depends(get_db)):
-    return get_obj(ItemOption, item_option_id, db)
 
 def get_order(order_id: int, db: Session = Depends(get_db)):
     return get_obj(Order, order_id, db)

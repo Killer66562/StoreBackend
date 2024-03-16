@@ -68,39 +68,17 @@ class Item(Base):
     __tablename__ = "items"
     name: Mapped[str] = mapped_column(String(length=50), unique=False, index=False, nullable=False)
     introduction: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
+    count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=0)
+    price: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
     store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
     store: Mapped["Store"] = relationship("Store", primaryjoin="Store.id == Item.store_id", uselist=False, back_populates="items")
-    option_titles: Mapped[list["ItemOptionTitle"]] = relationship("ItemOptionTitle", primaryjoin="Item.id == ItemOptionTitle.item_id", uselist=True, back_populates="item")
-
-
-class ItemOptionTitle(Base):
-    __tablename__ = "item_option_titles"
-    name: Mapped[str] = mapped_column(String(length=20), unique=False, index=False, nullable=False)
-    item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
-    item: Mapped["Item"] = relationship("Item", primaryjoin="Item.id == ItemOptionTitle.item_id", uselist=False, back_populates="option_titles")
-    options: Mapped[list["ItemOption"]] = relationship("ItemOption", primaryjoin="ItemOptionTitle.id == ItemOption.item_option_title_id", uselist=True)
-
-
-class ItemOption(Base):
-    __tablename__ = "item_options"
-    name: Mapped[str] = mapped_column(String(length=20), unique=False, index=False, nullable=False)
-    item_option_title_id: Mapped[int] = mapped_column(ForeignKey("item_option_titles.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
-
-    option_title: Mapped["ItemOptionTitle"] = relationship("ItemOptionTitle", primaryjoin="ItemOptionTitle.id == ItemOption.item_option_title_id", uselist=False, back_populates="options")
-
-
-class ItemOptionClosure(Base):
-    __tablename__ = "item_option_closures"
-    path: Mapped[str] = mapped_column(String(length=1000), unique=True, index=False, nullable=False)
-    remaining: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=0)
-    price: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=0)
 
 
 class Order(Base):
     __tablename__ = "orders"
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
-    item_option_closure_id: Mapped[int] = mapped_column(ForeignKey("item_option_closures.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
     status: Mapped[
         Literal[
@@ -118,7 +96,7 @@ class Order(Base):
 class CartItem(Base):
     __tablename__ = "cart_items"
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
-    item_option_id: Mapped[int] = mapped_column(ForeignKey("item_options.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
 
     owner: Mapped["User"] = relationship("User", primaryjoin="User.id == CartItem.user_id", uselist=False, back_populates="cart_items")
