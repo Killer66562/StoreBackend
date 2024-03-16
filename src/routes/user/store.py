@@ -4,7 +4,7 @@ from fastapi import Depends, Response
 
 from sqlalchemy.orm import Session
 
-from models import Item, ItemOption, ItemOptionTitle, Order, OrderDetail, User, Store, District
+from models import Item, ItemOption, ItemOptionClosure, ItemOptionTitle, Order, OrderDetail, User, Store, District
 
 from schemas.user import CUItemOptionSchema, CUStoreSchema, CUItemSchema, CUItemOptionTitleSchema
 from schemas.general import FullItemSchema, ItemOptionSchema, ItemOptionTitleSchema, ItemSchema, StoreSchema
@@ -170,15 +170,10 @@ def create_user_item_item_option(item_id: int, item_option_title_id: int, item_o
     item_option = db.query(ItemOption).filter(ItemOption.id == item_option_id, ItemOption.item_option_title_id == item_option_title_id).first()
     if not item_option:
         return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    order_with_this_item_option_id = db.query(OrderDetail).filter(OrderDetail.item_option_id == item_option_id).first()
-    if order_with_this_item_option_id and item_option.additional_price != data.additional_price:
-        return JSONResponse(content={"message": "有訂單包含這個商品選項，您暫時無法更改此商品選項的價格。"}, status_code=400)
     item_option_exist = db.query(ItemOption).filter(ItemOption.name == data.name, ItemOption.item_option_title_id == item_option_title_id, ItemOption.id != item_option_id).first()
     if item_option_exist:
         return JSONResponse(content={"message": "已存在同名的商品選項"}, status_code=409)
     item_option.name = data.name
-    item_option.additional_price = data.additional_price
-    item_option.remaining = data.remaining
     db.commit()
     return item_option
 
@@ -195,9 +190,6 @@ def delete_user_item_item_option(item_id: int, item_option_title_id: int, item_o
     item_option = db.query(ItemOption).filter(ItemOption.id == item_option_id, ItemOption.item_option_title_id == item_option_title_id).first()
     if not item_option:
         return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    order_with_this_item_option_id = db.query(OrderDetail).filter(OrderDetail.item_option_id == item_option_id).first()
-    if order_with_this_item_option_id:
-        return JSONResponse(content={"message": "有訂單包含這個商品選項，您暫時無法刪除此商品選項。"}, status_code=400)
     db.delete(item_option)
     db.commit()
     return Response(status_code=204)

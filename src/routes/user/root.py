@@ -6,10 +6,11 @@ from models import User
 
 from sqlalchemy.orm import Session
 
-from . import store
+from . import store, order
 
 router = APIRouter(prefix="/user")
 router.include_router(store.router)
+router.include_router(order.router)
 
 @router.get("")
 def get_user_info(user: User = Depends(get_current_user)):

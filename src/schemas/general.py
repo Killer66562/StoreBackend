@@ -49,6 +49,7 @@ class StoreSchema(BaseResourceSchema):
 class ItemSchema(BaseResourceSchema):
     name: str
     introduction: str
+    price: int
     store_id: int
 
 
@@ -59,7 +60,7 @@ class ItemOptionTitleSchema(BaseResourceSchema):
 
 class ItemOptionSchema(BaseResourceSchema):
     name: str
-    price: int
+    additional_price: int
     remaining: int
     item_option_title_id: int
 

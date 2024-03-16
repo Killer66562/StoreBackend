@@ -10,7 +10,7 @@ class CUStoreSchema(BaseModel):
 class CUItemSchema(BaseModel):
     name: str
     introduction: str
-    additional_price: int
+    price: int
 
 
 class CUItemOptionTitleSchema(BaseModel):
