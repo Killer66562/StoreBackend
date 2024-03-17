@@ -4,12 +4,15 @@ from fastapi import Depends, Response
 
 from sqlalchemy.orm import Session
 
-from models import Item, ItemOption, ItemOptionClosure, ItemOptionTitle, Order, OrderDetail, User, Store, District
+from models import Item, User, Store, District
 
-from schemas.user import CUItemOptionSchema, CUStoreSchema, CUItemSchema, CUItemOptionTitleSchema
-from schemas.general import FullItemSchema, ItemOptionSchema, ItemOptionTitleSchema, ItemSchema, StoreSchema
+from schemas.user import CUStoreSchema, CUItemSchema
+from schemas.general import ItemSchema, StoreSchema
 
 from dependencies import get_current_user, get_db
+
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
 
 
 router = APIRouter(prefix="/store")
@@ -53,11 +56,11 @@ def delete_user_store(user: User = Depends(get_current_user), db: Session = Depe
     db.commit()
     return Response(content=None, status_code=204)
 
-@router.get("/items", response_model=list[FullItemSchema], status_code=200)
+@router.get("/items", response_model=Page[ItemSchema], status_code=200)
 def get_user_store_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.store:
         return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
-    return user.store.items
+    return paginate(db.query(Item).filter(Item.store_id == user.store.id))
 
 @router.post("/items", response_model=ItemSchema)
 def create_item_for_user_store(data: CUItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -77,6 +80,8 @@ def update_item_from_user_store(item_id: int, data: CUItemSchema, user: User = D
         return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
     item.name = data.name
     item.introduction = data.introduction
+    item.count = data.count
+    item.price = data.price
     db.commit()
     return item
 
@@ -91,105 +96,3 @@ def delete_item_from_user_store(item_id: int, user: User = Depends(get_current_u
     db.delete(item)
     db.commit()
     return Response(content=None, status_code=204)
-
-#新增商品選項標題
-@router.post("/items/{item_id}/item_option_titles", response_model=ItemOptionTitleSchema, status_code=201)
-def get_user_item_item_option_titles(item_id: int, data: CUItemOptionTitleSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not user.store:
-        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
-    item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
-    if not item:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_title_exist = db.query(ItemOptionTitle).filter(ItemOptionTitle.name == data.name).first()
-    if item_option_title_exist:
-        return JSONResponse(content={"message": "已存在同名的商品選項標題"}, status_code=409)
-    item_option_title = ItemOptionTitle(**data.model_dump(), item_id=item_id)
-    db.add(item_option_title)
-    db.commit()
-    return item_option_title
-
-@router.put("/items/{item_id}/item_option_titles/{item_option_title_id}", response_model=ItemOptionTitleSchema, status_code=200)
-def get_user_item_item_option_titles(item_id: int, item_option_title_id: int, data: CUItemOptionTitleSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not user.store:
-        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=409)
-    item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
-    if not item:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_title = db.query(ItemOptionTitle).filter(ItemOptionTitle.id == item_option_title_id, ItemOptionTitle.item_id == item_id).first()
-    if not item_option_title:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_title_exist = db.query(ItemOptionTitle).filter(ItemOptionTitle.name == data.name, ItemOptionTitle.id != item_option_title_id).first()
-    if item_option_title_exist:
-        return JSONResponse(content={"message": "已存在同名的商品選項標題"}, status_code=409)
-    item_option_title.name = data.name
-    db.commit()
-    return item_option_title
-
-@router.delete("/items/{item_id}/item_option_titles/{item_option_title_id}", status_code=204)
-def get_user_item_item_option_titles(item_id: int, item_option_title_id: int, data: CUItemOptionTitleSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not user.store:
-        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
-    item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
-    if not item:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_title = db.query(ItemOptionTitle).filter(ItemOptionTitle.id == item_option_title_id, ItemOptionTitle.item_id == item_id).first()
-    if not item_option_title:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    db.delete(item_option_title)
-    db.commit()
-    return Response(status_code=204)
-
-@router.post("/items/{item_id}/item_option_titles/{item_option_title_id}/item_options", response_model=ItemOptionSchema, status_code=201)
-def create_user_item_item_option(item_id: int, item_option_title_id: int, data: CUItemOptionSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not user.store:
-        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
-    item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
-    if not item:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_title = db.query(ItemOptionTitle).filter(ItemOptionTitle.id == item_option_title_id, ItemOptionTitle.item_id == item_id).first()
-    if not item_option_title:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_exist = db.query(ItemOption).filter(ItemOption.name == data.name, ItemOption.item_option_title_id == item_option_title_id).first()
-    if item_option_exist:
-        return JSONResponse(content={"message": "已存在同名的商品選項"}, status_code=409)
-    item_option = ItemOption(**data.model_dump(), item_option_title_id=item_option_title_id)
-    db.add(item_option)
-    db.commit()
-    return item_option
-
-@router.put("/items/{item_id}/item_option_titles/{item_option_title_id}/item_options/{item_option_id}", response_model=ItemOptionSchema, status_code=200)
-def create_user_item_item_option(item_id: int, item_option_title_id: int, item_option_id: int, data: CUItemOptionSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not user.store:
-        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
-    item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
-    if not item:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_title = db.query(ItemOptionTitle).filter(ItemOptionTitle.id == item_option_title_id, ItemOptionTitle.item_id == item_id).first()
-    if not item_option_title:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option = db.query(ItemOption).filter(ItemOption.id == item_option_id, ItemOption.item_option_title_id == item_option_title_id).first()
-    if not item_option:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_exist = db.query(ItemOption).filter(ItemOption.name == data.name, ItemOption.item_option_title_id == item_option_title_id, ItemOption.id != item_option_id).first()
-    if item_option_exist:
-        return JSONResponse(content={"message": "已存在同名的商品選項"}, status_code=409)
-    item_option.name = data.name
-    db.commit()
-    return item_option
-
-@router.delete("/items/{item_id}/item_option_titles/{item_option_title_id}/item_options/{item_option_id}")
-def delete_user_item_item_option(item_id: int, item_option_title_id: int, item_option_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    if not user.store:
-        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
-    item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
-    if not item:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option_title = db.query(ItemOptionTitle).filter(ItemOptionTitle.id == item_option_title_id, ItemOptionTitle.item_id == item_id).first()
-    if not item_option_title:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    item_option = db.query(ItemOption).filter(ItemOption.id == item_option_id, ItemOption.item_option_title_id == item_option_title_id).first()
-    if not item_option:
-        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
-    db.delete(item_option)
-    db.commit()
-    return Response(status_code=204)

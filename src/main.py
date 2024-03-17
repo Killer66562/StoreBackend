@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi_pagination import add_pagination
 import uvicorn
 
 from fastapi import Depends, FastAPI
@@ -11,6 +13,7 @@ from dependencies import get_db, get_password_hash, authenticate_user, create_to
 
 from routes import user as user_route
 from routes import admin as admin_route
+from routes import general as general_route
 
 from models import User
 
@@ -20,6 +23,17 @@ from schemas.general import LoginSchema, RegisterSchema, TokenSchema, UserSchema
 app = FastAPI()
 app.include_router(user_route.router)
 app.include_router(admin_route.router)
+app.include_router(general_route.router)
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def hello():
@@ -48,6 +62,8 @@ def login(user: User = Depends(get_current_user_by_refresh_token)):
     access_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(hours=1), "for": "access"})
     refresh_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(days=3600), "for": "refresh"})
     return {"access_token": access_token, "refresh_token": refresh_token}
+
+add_pagination(app)
 
 if __name__ == '__main__':
     uvicorn.run("main:app", reload=True)

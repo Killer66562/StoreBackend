@@ -10,6 +10,7 @@ class CUStoreSchema(BaseModel):
 class CUItemSchema(BaseModel):
     name: str
     introduction: str
+    count: int
     price: int
 
 
@@ -23,12 +24,6 @@ class CUItemOptionSchema(BaseModel):
     remaining: int
 
 
-class _OrderDetail(BaseModel):
-    item_option_title_id: int
-    item_option_id: int
-
-
 class CUOrderSchema(BaseModel):
     item_id: int
-    order_details: list[_OrderDetail]
     count: int
