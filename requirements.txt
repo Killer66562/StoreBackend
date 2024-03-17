@@ -6,6 +6,7 @@ click==8.1.7
 ecdsa==0.18.0
 exceptiongroup==1.2.0
 fastapi==0.110.0
+fastapi-pagination==0.12.19
 greenlet==3.0.3
 h11==0.14.0
 httptools==0.6.1
