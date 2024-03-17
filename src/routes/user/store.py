@@ -11,6 +11,9 @@ from schemas.general import ItemSchema, StoreSchema
 
 from dependencies import get_current_user, get_db
 
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
+
 
 router = APIRouter(prefix="/store")
 
@@ -53,11 +56,11 @@ def delete_user_store(user: User = Depends(get_current_user), db: Session = Depe
     db.commit()
     return Response(content=None, status_code=204)
 
-@router.get("/items", response_model=list[ItemSchema], status_code=200)
+@router.get("/items", response_model=Page[ItemSchema], status_code=200)
 def get_user_store_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.store:
         return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
-    return user.store.items
+    return paginate(db.query(Item).filter(Item.store_id == user.store.id))
 
 @router.post("/items", response_model=ItemSchema)
 def create_item_for_user_store(data: CUItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):

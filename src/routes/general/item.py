@@ -2,21 +2,23 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from fastapi import Depends, Response
 
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
+
 from sqlalchemy.orm import Session
 
-from models import Item, User, Store, District
+from models import Item
 
-from schemas.user import CUStoreSchema, CUItemSchema
-from schemas.general import FullItemSchema, ItemSchema, StoreSchema
+from schemas.general import FullItemSchema
 
-from dependencies import get_current_user, get_db
+from dependencies import  get_db
 
 
 router = APIRouter(prefix="/items")
 
-@router.get("", response_model=list[FullItemSchema], status_code=200)
+@router.get("", response_model=Page[FullItemSchema], status_code=200)
 def get_items(db: Session = Depends(get_db)):
-    return db.query(Item).all()
+    return paginate(db.query(Item))
 
 @router.get("/{item_id}", response_model=FullItemSchema)
 def get_specific_item(item_id: int, db: Session = Depends(get_db)):

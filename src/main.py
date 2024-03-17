@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi_pagination import add_pagination
 import uvicorn
 
 from fastapi import Depends, FastAPI
@@ -61,6 +62,8 @@ def login(user: User = Depends(get_current_user_by_refresh_token)):
     access_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(hours=1), "for": "access"})
     refresh_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(days=3600), "for": "refresh"})
     return {"access_token": access_token, "refresh_token": refresh_token}
+
+add_pagination(app)
 
 if __name__ == '__main__':
     uvicorn.run("main:app", reload=True)
