@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 import uvicorn
 
@@ -11,6 +12,7 @@ from dependencies import get_db, get_password_hash, authenticate_user, create_to
 
 from routes import user as user_route
 from routes import admin as admin_route
+from routes import general as general_route
 
 from models import User
 
@@ -20,6 +22,17 @@ from schemas.general import LoginSchema, RegisterSchema, TokenSchema, UserSchema
 app = FastAPI()
 app.include_router(user_route.router)
 app.include_router(admin_route.router)
+app.include_router(general_route.router)
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def hello():

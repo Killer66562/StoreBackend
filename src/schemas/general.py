@@ -62,3 +62,7 @@ class FullStoreSchema(StoreSchema):
 class OrderSchema(BaseResourceSchema):
     item_id: int
     count: int
+
+
+class FullItemSchema(ItemSchema):
+    store: StoreSchema
