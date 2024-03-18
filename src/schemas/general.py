@@ -66,3 +66,7 @@ class OrderSchema(BaseResourceSchema):
 
 class FullItemSchema(ItemSchema):
     store: StoreSchema
+
+
+class FullCitySchema(CitySchema):
+    districts: list[DistrictSchema] = []
