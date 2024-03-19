@@ -27,3 +27,8 @@ class CUItemOptionSchema(BaseModel):
 class CUOrderSchema(BaseModel):
     item_id: int
     count: int
+
+
+class CUCartItemSchema(BaseModel):
+    item_id: int
+    count: int
