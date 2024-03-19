@@ -24,5 +24,5 @@ def get_items(db: Session = Depends(get_db)):
 def get_specific_item(item_id: int, db: Session = Depends(get_db)):
     item = db.query(Item).filter(Item.id == item_id).first()
     if not item:
-        return JSONResponse(content={"message": "資源不存在"})
+        return JSONResponse(content={"message": "資源不存在"}, status_code=404)
     return item
