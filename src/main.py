@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from dependencies import get_db, get_password_hash, authenticate_user, create_token, get_current_user_by_refresh_token
 
+from exceptions import UnauthenticatedException
 from routes import user as user_route
 from routes import admin as admin_route
 from routes import general as general_route
@@ -25,7 +26,7 @@ app.include_router(user_route.router)
 app.include_router(admin_route.router)
 app.include_router(general_route.router)
 
-origins = ["*"]
+origins = ["http://localhost:5173"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,6 +35,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(UnauthenticatedException)
+def unauthenciated_handler(request, exc):
+    return JSONResponse(content={"message": "身分驗證失敗，請重新登入。"}, status_code=401)
+
+@app.exception_handler(Exception)
+def any_exception_handler(request, exc):
+    return JSONResponse(content={"message": "伺服器錯誤，請聯繫伺服器管理員。"}, status_code=500)
 
 @app.get("/")
 def hello():
