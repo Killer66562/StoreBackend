@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.staticfiles import StaticFiles
 from fastapi_pagination import add_pagination
 import uvicorn
 
@@ -22,6 +23,9 @@ from schemas.general import LoginSchema, RegisterSchema, TokenSchema, UserSchema
 
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory="static"))
+
 app.include_router(user_route.router)
 app.include_router(admin_route.router)
 app.include_router(general_route.router)

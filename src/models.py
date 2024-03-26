@@ -56,6 +56,7 @@ class Store(Base):
     __tablename__ = "stores"
     name: Mapped[str] = mapped_column(String(length=20), unique=True, index=True, nullable=False)
     introduction: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
+    icon: Mapped[str] = mapped_column(String(length=100), unique=False, index=False, nullable=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=True, index=True, nullable=False)
     district_id: Mapped[int] = mapped_column(ForeignKey("districts.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
@@ -68,11 +69,20 @@ class Item(Base):
     __tablename__ = "items"
     name: Mapped[str] = mapped_column(String(length=50), unique=False, index=False, nullable=False)
     introduction: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
+    icon: Mapped[str] = mapped_column(String(length=100), unique=False, index=False, nullable=True)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=0)
     price: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
     store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
     store: Mapped["Store"] = relationship("Store", primaryjoin="Store.id == Item.store_id", uselist=False, back_populates="items")
+    images: Mapped[list["ItemImage"]] = relationship("ItemImage", primaryjoin="ItemImage.item_id == Item.id", uselist=True, back_populates="item", order_by="ItemImage.id")
+
+class ItemImage(Base):
+    __tablename__ = "item_images"
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=True, nullable=False)
+    path: Mapped[str] = mapped_column(String(length=100), unique=False, index=False, nullable=True)
+
+    item: Mapped["Item"] = relationship("Item", primaryjoin="ItemImage.item_id == Item.id", uselist=False, back_populates="images")
 
 
 class Order(Base):

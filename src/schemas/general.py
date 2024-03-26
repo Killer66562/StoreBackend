@@ -43,16 +43,25 @@ class DistrictSchema(BaseResourceSchema):
 class StoreSchema(BaseResourceSchema):
     name: str
     introduction: str
+    icon: str | None = None
     user_id: int
     district_id: int
+
+
+class ItemImageSchema(BaseResourceSchema):
+    item_id: int
+    path: str
 
 
 class ItemSchema(BaseResourceSchema):
     name: str
     introduction: str
+    icon: str | None = None
     count: int
     price: int
     store_id: int
+
+    images: list[ItemImageSchema] = []
 
 
 class FullStoreSchema(StoreSchema):

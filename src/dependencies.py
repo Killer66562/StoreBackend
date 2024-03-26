@@ -118,3 +118,4 @@ def get_cart_item(cart_item_id: int, db: Session = Depends(get_db)):
 
 def get_comment(comment_id: int, db: Session = Depends(get_db)):
     return get_obj(Comment, comment_id, db)
+        
