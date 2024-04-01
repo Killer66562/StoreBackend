@@ -18,6 +18,8 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(length=20), unique=True, index=True, nullable=False)
     email: Mapped[str] = mapped_column(String(length=100), unique=True, index=True, nullable=False)
     password: Mapped[str] = mapped_column(String(length=100), unique=False, index=False, nullable=False)
+    birthday: Mapped[datetime] = mapped_column(DateTime, unique=False, index=False, nullable=False)
+    level: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=1)
     is_admin: Mapped[bool] = mapped_column(Boolean, unique=False, index=False, nullable=False, default=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, unique=False, index=False, nullable=False, default=False)
 
@@ -25,6 +27,7 @@ class User(Base):
     store: Mapped["Store"] = relationship("Store", primaryjoin="User.id == Store.user_id", uselist=False, back_populates="owner")
     orders: Mapped[list["Order"]] = relationship("Order", primaryjoin="User.id == Order.user_id", uselist=True, back_populates="owner")
     cart_items: Mapped[list["CartItem"]] = relationship("CartItem", primaryjoin="User.id == CartItem.user_id", uselist=True, back_populates="owner")
+    buy_next_time_items: Mapped[list["BuyNextTimeItem"]] = relationship("BuyNextTimeItem", primaryjoin="User.id == BuyNextTimeItem.user_id", uselist=True, back_populates="owner")
 
 
 class Verification(Base):
@@ -73,6 +76,7 @@ class Item(Base):
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=0)
     price: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
     store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    need_18: Mapped[bool] = mapped_column(Boolean, unique=False, index=False, nullable=False, default=False)
 
     store: Mapped["Store"] = relationship("Store", primaryjoin="Store.id == Item.store_id", uselist=False, back_populates="items")
     images: Mapped[list["ItemImage"]] = relationship("ItemImage", primaryjoin="ItemImage.item_id == Item.id", uselist=True, back_populates="item", order_by="ItemImage.id")
@@ -110,6 +114,48 @@ class CartItem(Base):
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
 
     owner: Mapped["User"] = relationship("User", primaryjoin="User.id == CartItem.user_id", uselist=False, back_populates="cart_items")
+
+
+class BuyNextTimeItem(Base):
+    __tablename__ = "buy_next_time_items"
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+
+    owner: Mapped["User"] = relationship("User", primaryjoin="User.id == BuyNextTimeItem.user_id", uselist=False, back_populates="buy_next_time_items")
+
+
+class ItemReport(Base):
+    __tablename__ = "item_reports"
+    reporter_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    reported_item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    reason: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
+
+    reporter: Mapped["User"] = relationship("User", primaryjoin="User.id == ItemReport.reporter_id", uselist=False)
+    reported_item: Mapped["Item"] = relationship("Item", primaryjoin="Item.id == ItemReport.reported_item_id", uselist=False)
+    images: Mapped[list["ItemReportImage"]] = relationship("ItemReportImage", primaryjoin="ItemReport.id == ItemReportImage.report_id", uselist=True)
+
+
+class UserReport(Base):
+    __tablename__ = "user_reports"
+    reporter_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    reported_user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    reason: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
+
+    reporter: Mapped["User"] = relationship("User", primaryjoin="User.id == UserReport.reporter_id", uselist=False)
+    reported_user: Mapped["User"] = relationship("User", primaryjoin="User.id == UserReport.reported_user_id", uselist=False)
+    images: Mapped[list["UserReportImage"]] = relationship("UserReportImage", primaryjoin="UserReport.id == UserReportImage.report_id", uselist=True)
+
+
+class ItemReportImage(Base):
+    __tablename__ = "item_report_images"
+    report_id: Mapped[int] = mapped_column(ForeignKey("item_reports.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    path: Mapped[str] = mapped_column(String(length=100), unique=False, index=False, nullable=False)
+
+
+class UserReportImage(Base):
+    __tablename__ = "user_report_images"
+    report_id: Mapped[int] = mapped_column(ForeignKey("user_reports.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
+    path: Mapped[str] = mapped_column(String(length=100), unique=False, index=False, nullable=False)
 
 
 class Comment(Base):
