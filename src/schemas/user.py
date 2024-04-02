@@ -32,3 +32,13 @@ class CUOrderSchema(BaseModel):
 class CUCartItemSchema(BaseModel):
     item_id: int
     count: int
+
+
+class CUItemReportSchema(BaseModel):
+    reporter_id: int
+    reported_item_id: int
+
+
+class CUUserReportSchema(BaseModel):
+    reporter_id: int
+    reported_user_id: int
