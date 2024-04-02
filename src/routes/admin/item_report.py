@@ -29,8 +29,8 @@ def get_user_report(item_report_id: int, user: User = Depends(get_current_user),
     return report
 
 @router.delete("/{item_report_id}")
-def delete_user_report(user_report_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    report = db.query(ItemReport).filter(ItemReport.id == user_report_id).first()
+def delete_user_report(item_report_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    report = db.query(ItemReport).filter(ItemReport.id == item_report_id).first()
     if not report:
         return JSONResponse(content={"message": "資源不存在"}, status_code=400)
     db.delete(report)
