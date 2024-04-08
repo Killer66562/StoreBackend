@@ -11,6 +11,7 @@ class BaseResourceSchema(BaseModel):
 class UserSchema(BaseResourceSchema):
     username: str
     email: str
+    birthday: datetime
     is_admin: bool
     is_verified: bool
 
@@ -19,6 +20,7 @@ class RegisterSchema(BaseModel):
     username: str
     email: str
     password: str
+    birthday: datetime
 
 
 class LoginSchema(BaseModel):

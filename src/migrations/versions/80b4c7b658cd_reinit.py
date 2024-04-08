@@ -1,8 +1,8 @@
-"""Init
+"""ReInit
 
-Revision ID: 08e336c9d6dd
+Revision ID: 80b4c7b658cd
 Revises: 
-Create Date: 2024-03-16 15:32:21.752104
+Create Date: 2024-04-01 11:35:14.490634
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '08e336c9d6dd'
+revision: str = '80b4c7b658cd'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,6 +31,8 @@ def upgrade() -> None:
     sa.Column('username', sa.String(length=20), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
     sa.Column('password', sa.String(length=100), nullable=False),
+    sa.Column('birthday', sa.DateTime(), nullable=False),
+    sa.Column('level', sa.Integer(), nullable=False),
     sa.Column('is_admin', sa.Boolean(), nullable=False),
     sa.Column('is_verified', sa.Boolean(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -49,6 +51,16 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_districts_id'), 'districts', ['id'], unique=True)
+    op.create_table('user_reports',
+    sa.Column('reporter_id', sa.Integer(), nullable=False),
+    sa.Column('reported_user_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['reported_user_id'], ['users.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['reporter_id'], ['users.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_user_reports_id'), 'user_reports', ['id'], unique=True)
     op.create_table('verifications',
     sa.Column('code', sa.String(length=5), nullable=False),
     sa.Column('last_request', sa.DateTime(), nullable=False),
@@ -63,6 +75,7 @@ def upgrade() -> None:
     op.create_table('stores',
     sa.Column('name', sa.String(length=20), nullable=False),
     sa.Column('introduction', sa.String(length=500), nullable=False),
+    sa.Column('icon', sa.String(length=100), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('district_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -77,15 +90,27 @@ def upgrade() -> None:
     op.create_table('items',
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('introduction', sa.String(length=500), nullable=False),
+    sa.Column('icon', sa.String(length=100), nullable=True),
     sa.Column('count', sa.Integer(), nullable=False),
     sa.Column('price', sa.Integer(), nullable=False),
     sa.Column('store_id', sa.Integer(), nullable=False),
+    sa.Column('need_18', sa.Boolean(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['store_id'], ['stores.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_items_id'), 'items', ['id'], unique=True)
+    op.create_table('buy_next_time_items',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('item_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['item_id'], ['items.id'], onupdate='CASCADE', ondelete='RESTRICT'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_buy_next_time_items_id'), 'buy_next_time_items', ['id'], unique=True)
     op.create_table('cart_items',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('item_id', sa.Integer(), nullable=False),
@@ -108,6 +133,26 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_comments_id'), 'comments', ['id'], unique=True)
+    op.create_table('item_images',
+    sa.Column('item_id', sa.Integer(), nullable=False),
+    sa.Column('path', sa.String(length=100), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['item_id'], ['items.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_item_images_id'), 'item_images', ['id'], unique=True)
+    op.create_index(op.f('ix_item_images_item_id'), 'item_images', ['item_id'], unique=False)
+    op.create_table('item_reports',
+    sa.Column('reporter_id', sa.Integer(), nullable=False),
+    sa.Column('reported_item_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['reported_item_id'], ['items.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['reporter_id'], ['users.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_item_reports_id'), 'item_reports', ['id'], unique=True)
     op.create_table('orders',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('item_id', sa.Integer(), nullable=False),
@@ -127,10 +172,17 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_index(op.f('ix_orders_id'), table_name='orders')
     op.drop_table('orders')
+    op.drop_index(op.f('ix_item_reports_id'), table_name='item_reports')
+    op.drop_table('item_reports')
+    op.drop_index(op.f('ix_item_images_item_id'), table_name='item_images')
+    op.drop_index(op.f('ix_item_images_id'), table_name='item_images')
+    op.drop_table('item_images')
     op.drop_index(op.f('ix_comments_id'), table_name='comments')
     op.drop_table('comments')
     op.drop_index(op.f('ix_cart_items_id'), table_name='cart_items')
     op.drop_table('cart_items')
+    op.drop_index(op.f('ix_buy_next_time_items_id'), table_name='buy_next_time_items')
+    op.drop_table('buy_next_time_items')
     op.drop_index(op.f('ix_items_id'), table_name='items')
     op.drop_table('items')
     op.drop_index(op.f('ix_stores_user_id'), table_name='stores')
@@ -140,6 +192,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_verifications_user_id'), table_name='verifications')
     op.drop_index(op.f('ix_verifications_id'), table_name='verifications')
     op.drop_table('verifications')
+    op.drop_index(op.f('ix_user_reports_id'), table_name='user_reports')
+    op.drop_table('user_reports')
     op.drop_index(op.f('ix_districts_id'), table_name='districts')
     op.drop_table('districts')
     op.drop_index(op.f('ix_users_username'), table_name='users')

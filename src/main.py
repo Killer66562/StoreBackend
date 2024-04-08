@@ -56,7 +56,7 @@ def hello():
 def register(data: RegisterSchema, db: Session = Depends(get_db)):
     if db.query(User).filter(or_(User.username == data.username, User.email == data.email)).first():
         return JSONResponse(content={"message": "重複的使用者名稱或電子郵件信箱"}, status_code=409)
-    user = User(username=data.username, email=data.email, password=get_password_hash(data.password))
+    user = User(username=data.username, email=data.email, password=get_password_hash(data.password), birthday=data.birthday)
     db.add(user)
     db.commit()
     return user
