@@ -114,6 +114,7 @@ class CartItem(Base):
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
 
     owner: Mapped["User"] = relationship("User", primaryjoin="User.id == CartItem.user_id", uselist=False, back_populates="cart_items")
+    item: Mapped["Item"] = relationship("Item", primaryjoin="Item.id == CartItem.item_id", uselist=False)
 
 
 class BuyNextTimeItem(Base):

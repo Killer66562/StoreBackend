@@ -81,3 +81,13 @@ class FullItemSchema(ItemSchema):
 
 class FullCitySchema(CitySchema):
     districts: list[DistrictSchema] = []
+
+
+class CartItemSchema(BaseResourceSchema):
+    user_id: int
+    item_id: int
+    count: int
+
+
+class FullCartItemSchema(CartItemSchema):
+    item: ItemSchema

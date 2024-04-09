@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from models import CartItem, Item, Order, User, Store, District
 
 from schemas.user import CUOrderSchema, CUCartItemSchema
-from schemas.general import ItemSchema, OrderSchema, StoreSchema
+from schemas.general import FullCartItemSchema
 
 from dependencies import get_current_user, get_db
 
@@ -16,7 +16,7 @@ from enums import OrderStatus
 
 router = APIRouter(prefix="/cart_items")
 
-@router.get("")
+@router.get("", response_model=list[FullCartItemSchema])
 def get_user_cart_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return user.cart_items
 
