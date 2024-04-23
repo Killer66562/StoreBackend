@@ -42,3 +42,7 @@ class CUItemReportSchema(BaseModel):
 class CUUserReportSchema(BaseModel):
     reporter_id: int
     reported_user_id: int
+
+
+class CUBuyNextTimeItemSchema(BaseModel):
+    item_id: int
