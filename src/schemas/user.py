@@ -35,13 +35,12 @@ class CUCartItemSchema(BaseModel):
 
 
 class CUItemReportSchema(BaseModel):
-    reporter_id: int
     reported_item_id: int
 
 
 class CUUserReportSchema(BaseModel):
-    reporter_id: int
     reported_user_id: int
+    reason: str
 
 
 class CUBuyNextTimeItemSchema(BaseModel):

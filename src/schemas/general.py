@@ -89,5 +89,14 @@ class CartItemSchema(BaseResourceSchema):
     count: int
 
 
+class BuyNextTimeItemSchema(BaseResourceSchema):
+    user_id: int
+    item_id: int
+
+
 class FullCartItemSchema(CartItemSchema):
     item: ItemSchema
+
+
+class FullBuyNextTimeItemSchema(BuyNextTimeItemSchema):
+    item: FullItemSchema

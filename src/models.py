@@ -123,6 +123,7 @@ class BuyNextTimeItem(Base):
     item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
 
     owner: Mapped["User"] = relationship("User", primaryjoin="User.id == BuyNextTimeItem.user_id", uselist=False, back_populates="buy_next_time_items")
+    item: Mapped["Item"] = relationship("Item", primaryjoin="Item.id == BuyNextTimeItem.item_id", uselist=False)
 
 
 class ItemReport(Base):

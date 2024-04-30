@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from models import BuyNextTimeItem, Item, Order, User, Store, District
 
 from schemas.user import CUOrderSchema, CUBuyNextTimeItemSchema
-from schemas.general import ItemSchema, OrderSchema, StoreSchema
+from schemas.general import FullBuyNextTimeItemSchema, ItemSchema, OrderSchema, StoreSchema
 
 from dependencies import get_current_user, get_db
 
@@ -16,7 +16,7 @@ from enums import OrderStatus
 
 router = APIRouter(prefix="/buy_next_time_items")
 
-@router.get("")
+@router.get("", response_model=list[FullBuyNextTimeItemSchema])
 def get_user_buy_next_time_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return user.buy_next_time_items
 
