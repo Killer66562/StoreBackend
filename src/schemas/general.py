@@ -42,6 +42,16 @@ class DistrictSchema(BaseResourceSchema):
     city_id: int
 
 
+class CUCommentSchema(BaseModel):
+    content: str
+
+
+class CommentSchema(BaseResourceSchema):
+    content: str
+    item_id: int
+    user_id: int
+
+
 class StoreSchema(BaseResourceSchema):
     name: str
     introduction: str
@@ -63,8 +73,6 @@ class ItemSchema(BaseResourceSchema):
     price: int
     store_id: int
 
-    images: list[ItemImageSchema] = []
-
 
 class FullStoreSchema(StoreSchema):
     items: list[ItemSchema] = []
@@ -75,8 +83,14 @@ class OrderSchema(BaseResourceSchema):
     count: int
 
 
+class FullCommentSchema(CommentSchema):
+    user: UserSchema
+
+
 class FullItemSchema(ItemSchema):
     store: StoreSchema
+    images: list[ItemImageSchema] = []
+    comments: list[FullCommentSchema] = []
 
 
 class FullCitySchema(CitySchema):

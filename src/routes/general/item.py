@@ -8,11 +8,11 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 
 from sqlalchemy.orm import Session
 
-from models import Item
+from models import Item, Comment, User
 
-from schemas.general import FullItemSchema
+from schemas.general import CommentSchema, FullCommentSchema, FullItemSchema, CUCommentSchema
 
-from dependencies import  get_db
+from dependencies import  get_current_user, get_db
 
 
 router = APIRouter(prefix="/items")
@@ -43,5 +43,37 @@ def get_specific_item(item_id: int, db: Session = Depends(get_db)):
     if not item:
         return JSONResponse(content={"message": "資源不存在"}, status_code=404)
     return item
+
+@router.get("/{item_id}/comments", response_model=list[FullCommentSchema])
+def get_specific_item_comments(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        return JSONResponse(content={"message": "資源不存在"}, status_code=404)
+    return item.comments
+
+@router.put("/{item_id}/comments", response_model=FullCommentSchema)
+def add_specific_item_comments(item_id: int, data: CUCommentSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        return JSONResponse(content={"message": "資源不存在"}, status_code=404)
+    comment = db.query(Comment).filter(Comment.item_id == item_id, Comment.user_id == user.id).first()
+    if comment:
+        comment.content = data.content
+    else:
+        comment = Comment(**data.model_dump(), user_id=user.id, item_id=item_id)
+        db.add(comment)
+    db.commit()
+    print(comment)
+    return comment
+
+@router.get("/{item_id}/comments/{comment_id}", response_model=FullItemSchema)
+def get_specific_item(item_id: int, comment_id: int, db: Session = Depends(get_db)):
+    item = db.query(Item).filter(Item.id == item_id).first()
+    if not item:
+        return JSONResponse(content={"message": "資源不存在"}, status_code=404)
+    comment = db.query(Comment).filter(Comment.item_id == item_id, Comment.id == comment_id).first()
+    if not comment:
+        return JSONResponse(content={"message": "資源不存在"}, status_code=404)
+    return comment
 
 add_pagination(router)
