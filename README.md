@@ -8,7 +8,8 @@
     3. 在終端機輸入 "docker compose up"
 
 ### 注意事項
-1. Docker容器刪除之後，裡面的資料會消失。（因為掛載資料庫的部份還沒寫）
+1. Docker容器刪除之後，裡面的資料會消失。
+2. 注意主機的8000port有沒有被其他process佔用，有的話記得改一下docker-compose.yml的映射端口，或者殺掉那個process。
 
 ## 專案啟動方式
 1. 下載python (3.10 or 3.11 only, 3.12 May cause bugs)
