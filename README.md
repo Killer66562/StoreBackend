@@ -1,8 +1,14 @@
 # 購物網站後端
 
 ## 測試環境啟動方式（docker）
-1. 在電腦上下載docker（不同OS方式不同，請自行查詢下載方法。）
-2. For Linux Users: 在終端機輸入 "docker compose up"
+1. 在電腦上下載docker及相關插件（如：docker-compose等）（不同OS方式不同，請自行查詢下載方法。）
+2. For Linux Users
+    1. 進到專案根目錄並開啟終端機 (bash, zsh, ...)
+    2. 在終端機輸入 "docker build -t store-backend ."
+    3. 在終端機輸入 "docker compose up"
+
+### 注意事項
+1. Docker容器刪除之後，裡面的資料會消失。（因為掛載資料庫的部份還沒寫）
 
 ## 專案啟動方式
 1. 下載python (3.10 or 3.11 only, 3.12 May cause bugs)
