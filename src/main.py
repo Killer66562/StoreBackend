@@ -22,6 +22,7 @@ from models import User
 
 from schemas.general import LoginSchema, RegisterSchema, TokenSchema, UserSchema
 
+from settings import settings
 
 app = FastAPI()
 
@@ -31,7 +32,7 @@ app.include_router(user_route.router)
 app.include_router(admin_route.router)
 app.include_router(general_route.router)
 
-origins = ["http://localhost:5173"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -80,4 +81,4 @@ def login(user: User = Depends(get_current_user_by_refresh_token)):
 add_pagination(app)
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("main:app", reload=True, host=settings.app_host, port=settings.app_port)

@@ -1,0 +1,5 @@
+services:
+  backend:
+    image: store-backend
+    ports:
+      - 8000:8000

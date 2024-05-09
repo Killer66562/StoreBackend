@@ -1,5 +1,9 @@
 # 購物網站後端
 
+## 測試環境啟動方式（docker）
+1. 在電腦上下載docker（不同OS方式不同，請自行查詢下載方法。）
+2. For Linux Users: 在終端機輸入 "docker compose up"
+
 ## 專案啟動方式
 1. 下載python (3.10 or 3.11 only, 3.12 May cause bugs)
 2. pip install virtualenv (安裝虛擬環境套件)
