@@ -114,3 +114,7 @@ class FullCartItemSchema(CartItemSchema):
 
 class FullBuyNextTimeItemSchema(BuyNextTimeItemSchema):
     item: FullItemSchema
+
+
+class FullDistrictSchema(DistrictSchema):
+    city: CitySchema

@@ -5,7 +5,7 @@ from fastapi.routing import APIRouter
 from dependencies import get_current_user, get_db
 
 from schemas.admin import CUDistrictSchema
-from schemas.general import DistrictSchema
+from schemas.general import FullDistrictSchema
 
 from sqlalchemy.orm import Session
 
@@ -21,7 +21,7 @@ from models import City, District, Store, User
 
 router = APIRouter(prefix="/districts")
 
-@router.post("", response_model=DistrictSchema)
+@router.post("", response_model=FullDistrictSchema)
 def create_district(data: CUDistrictSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     city_exist = db.query(City).filter(City.id == data.city_id).first()
     if not city_exist:
@@ -34,7 +34,7 @@ def create_district(data: CUDistrictSchema, user: User = Depends(get_current_use
     db.commit()
     return district
 
-@router.put("/{district_id}", response_model=DistrictSchema)
+@router.put("/{district_id}", response_model=FullDistrictSchema)
 def update_district(district_id: int, data: CUDistrictSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     district = db.query(District).filter(District.id == district_id).first()
     if not district:

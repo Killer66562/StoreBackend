@@ -9,17 +9,17 @@ from sqlalchemy.orm import Session
 
 from models import District
 
-from schemas.general import FullCitySchema
+from schemas.general import FullCitySchema, FullDistrictSchema
 
 from dependencies import  get_db
 
 router = APIRouter(prefix="/districts")
 
-@router.get("", response_model=list[FullCitySchema])
+@router.get("", response_model=list[FullDistrictSchema])
 def get_all_cities(db: Session = Depends(get_db)):
     return db.query(District).order_by(District.id).all()
 
-@router.get("/{district_id}", response_model=FullCitySchema)
+@router.get("/{district_id}", response_model=FullDistrictSchema)
 def get_specfic_city(district_id: int, db: Session = Depends(get_db)):
     district = db.query(District).filter(District.id == district_id).first()
     if not district:
