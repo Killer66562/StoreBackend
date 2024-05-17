@@ -29,7 +29,7 @@ def get_items(db: Session = Depends(get_db)):
     hot_items = random.sample(population=hot_items_raw, k=rand_k)
     return sorted(hot_items, key=lambda item : item.id, reverse=False)
 
-@router.get("/good", response_model=list[FullItemSchema], status_code=200)
+@router.get("/best", response_model=list[FullItemSchema], status_code=200)
 def get_items(db: Session = Depends(get_db)):
     good_items_raw = db.query(Item).order_by(Item.id).limit(50).all()
     good_items_raw_len = len(good_items_raw)
