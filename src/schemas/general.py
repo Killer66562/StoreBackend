@@ -14,6 +14,7 @@ class UserSchema(BaseResourceSchema):
     birthday: datetime
     is_admin: bool
     is_verified: bool
+    icon: str | None = None
 
 
 class RegisterSchema(BaseModel):

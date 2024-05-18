@@ -22,6 +22,7 @@ class User(Base):
     level: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False, default=1)
     is_admin: Mapped[bool] = mapped_column(Boolean, unique=False, index=False, nullable=False, default=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, unique=False, index=False, nullable=False, default=False)
+    icon: Mapped[str] = mapped_column(String(length=200), unique=False, index=False, nullable=True, default=None)
 
     verification: Mapped["Verification"] = relationship("Verification", primaryjoin="User.id == Verification.user_id", uselist=False, back_populates="user")
     store: Mapped["Store"] = relationship("Store", primaryjoin="User.id == Store.user_id", uselist=False, back_populates="owner")

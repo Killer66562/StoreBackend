@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-
 class CUStoreSchema(BaseModel):
     name: str
     introduction: str
@@ -45,3 +44,7 @@ class CUUserReportSchema(BaseModel):
 
 class CUBuyNextTimeItemSchema(BaseModel):
     item_id: int
+
+
+class CUUserIconSchema(BaseModel):
+    icon: str | None

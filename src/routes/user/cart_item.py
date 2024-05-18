@@ -4,6 +4,9 @@ from fastapi import Depends, Response
 
 from sqlalchemy.orm import Session
 
+from fastapi_pagination import Page, add_pagination
+from fastapi_pagination.ext.sqlalchemy import paginate
+
 from models import CartItem, Item, Order, User, Store, District
 
 from schemas.user import CUOrderSchema, CUCartItemSchema
@@ -16,9 +19,10 @@ from enums import OrderStatus
 
 router = APIRouter(prefix="/cart_items")
 
-@router.get("", response_model=list[FullCartItemSchema])
+@router.get("", response_model=Page[FullCartItemSchema])
 def get_user_cart_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return user.cart_items
+    user_cart_items_query = db.query(CartItem).filter(CartItem.user_id == user.id)
+    return paginate(user_cart_items_query)
 
 @router.post("")
 def create_user_cart_item(data: CUCartItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -49,3 +53,5 @@ def delete_user_cart_item(cart_item_id: int, user: User = Depends(get_current_us
     db.delete(cart_item)
     db.commit()
     return Response(status_code=204)
+
+add_pagination(router)

@@ -2,6 +2,9 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from fastapi import Depends, Response
 
+from fastapi_pagination import Page, add_pagination
+from fastapi_pagination.ext.sqlalchemy import paginate
+
 from sqlalchemy.orm import Session
 
 from models import BuyNextTimeItem, Item, Order, User, Store, District
@@ -14,11 +17,12 @@ from dependencies import get_current_user, get_db
 from enums import OrderStatus
 
 
-router = APIRouter(prefix="/buy_next_time_items")
+router = APIRouter(prefix="/liked_items")
 
-@router.get("", response_model=list[FullBuyNextTimeItemSchema])
+@router.get("", response_model=Page[FullBuyNextTimeItemSchema])
 def get_user_buy_next_time_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return user.buy_next_time_items
+    user_buy_next_time_items_query = db.query(BuyNextTimeItem).filter(BuyNextTimeItem.user_id == user.id)
+    return paginate(user_buy_next_time_items_query)
 
 @router.post("")
 def create_user_buy_next_time_item(data: CUBuyNextTimeItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -45,3 +49,5 @@ def delete_user_buy_next_time_item(buy_next_time_item_id: int, user: User = Depe
     db.delete(buy_next_time_item)
     db.commit()
     return Response(status_code=204)
+
+add_pagination(router)
