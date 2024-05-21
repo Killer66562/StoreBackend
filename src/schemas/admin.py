@@ -1,4 +1,8 @@
+from datetime import datetime
+from typing import Literal
 from pydantic import BaseModel
+
+from enums import UserQuerySortByEnum
 from .general import BaseResourceSchema, UserSchema, ItemSchema
 
 
@@ -35,3 +39,20 @@ class ItemReportSchema(BaseResourceSchema):
     reporter: UserSchema
     reported_item: ItemSchema
     images: list[ItemRepoertImageSchema]
+
+
+class CUUserSchema(BaseModel):
+    is_admin: bool
+    is_banned: bool | None = None
+
+
+class UserQuerySchema(BaseModel):
+    username: str | None = None
+    email: str | None = None
+    birthday_start: datetime | None = None
+    birthday_end: datetime | None = None
+    created_at_start: datetime | None = None
+    created_at_end: datetime | None = None
+    is_admin: bool | None = None
+    sort_by: UserQuerySortByEnum | None = None
+    desc: bool | None = None
