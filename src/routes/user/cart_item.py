@@ -19,10 +19,10 @@ from enums import OrderStatus
 
 router = APIRouter(prefix="/cart_items")
 
-@router.get("", response_model=Page[FullCartItemSchema])
+@router.get("", response_model=list[FullCartItemSchema])
 def get_user_cart_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    user_cart_items_query = db.query(CartItem).filter(CartItem.user_id == user.id)
-    return paginate(user_cart_items_query)
+    user_cart_items = db.query(CartItem).filter(CartItem.user_id == user.id).all()
+    return user_cart_items
 
 @router.post("")
 def create_user_cart_item(data: CUCartItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
