@@ -66,7 +66,7 @@ def update_user_store_icon(icon: UploadFile, user: User = Depends(get_current_us
         return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
     if icon.content_type != "image/jpeg" and icon.content_type != "image/png":
         return JSONResponse(content={"message": "只接受.jpeg和.png檔案"}, status_code=400)
-    if icon.size > 1024 * 1024:
+    if icon.size > 2048 * 2048:
         return JSONResponse(content={"message": "icon大小請勿超過1MB"}, status_code=400)
     icon.file.seek(0)
     filename = str(uuid.uuid4())
@@ -138,7 +138,7 @@ def update_item_icon_from_user_store(item_id: int, icon: UploadFile, user: User 
         return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
     if icon.content_type != "image/jpeg" and icon.content_type != "image/png":
         return JSONResponse(content={"message": "只接受.jpeg和.png檔案"}, status_code=400)
-    if icon.size > 1024 * 1024:
+    if icon.size > 2048 * 2048:
         return JSONResponse(content={"message": "icon大小請勿超過1MB"}, status_code=400)
     icon.file.seek(0)
     filename = str(uuid.uuid4())
@@ -175,7 +175,7 @@ def add_item_images_from_user_store(item_id: int, images: list[UploadFile], user
     for img in images:
         if img.content_type != "image/jpeg" and img.content_type != "image/png":
             return JSONResponse(content={"message": "只接受.jpeg和.png檔案"}, status_code=400)
-        if img.size > 1024 * 1024:
+        if img.size > 2048 * 2048:
             return JSONResponse(content={"message": "圖片大小請勿超過1MB"}, status_code=400)
     item_images = []
     for img in images:
@@ -205,7 +205,7 @@ def fully_update_item_images_from_user_store(item_id: int, images: list[UploadFi
     for img in images:
         if img.content_type != "image/jpeg" and img.content_type != "image/png":
             return JSONResponse(content={"message": "只接受.jpeg和.png檔案"}, status_code=400)
-        if img.size > 1024 * 1024:
+        if img.size > 2048 * 2048:
             return JSONResponse(content={"message": "圖片大小請勿超過1MB"}, status_code=400)
     item_images = []
     for img in images:
