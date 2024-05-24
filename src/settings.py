@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
     app_name: str = "購物網站後端"
     app_description: str = "小破站"
     app_version: str = "1.0.0"
@@ -19,8 +21,6 @@ class Settings(BaseSettings):
     #mail_ssl_tls: bool = False
     #mail_use_credentials: bool = False
     #mail_validate_certs: bool = False
-
-    model_config = SettingsConfigDict(env_file=".env")
 
     secret_key: str = "85c6b39014086ded16f58b0c582ef5a5167b0bdc891b45cc7bc3094bd57f47a3"
     algorithm: str = "HS256"

@@ -24,7 +24,7 @@ from schemas.general import LoginSchema, RegisterSchema, TokenSchema, UserSchema
 
 from settings import settings
 
-app = FastAPI()
+app = FastAPI(title=settings.app_name, description=settings.app_description, version=settings.app_version)
 
 app.mount("/static", StaticFiles(directory="static"))
 
@@ -50,11 +50,11 @@ def unauthenciated_handler(request, exc):
 def any_exception_handler(request, exc):
     return JSONResponse(content={"message": "伺服器錯誤，請聯繫伺服器管理員。"}, status_code=500)
 
-@app.get("/")
+@app.get("/", tags=["Hello"])
 def hello():
     return {"message": "Hello, world!"}
 
-@app.post("/register", response_model=UserSchema)
+@app.post("/register", response_model=UserSchema, tags=["Auth"])
 def register(data: RegisterSchema, db: Session = Depends(get_db)):
     if db.query(User).filter(or_(User.username == data.username, User.email == data.email)).first():
         return JSONResponse(content={"message": "重複的使用者名稱或電子郵件信箱"}, status_code=409)
@@ -63,7 +63,7 @@ def register(data: RegisterSchema, db: Session = Depends(get_db)):
     db.commit()
     return user
 
-@app.post("/login", response_model=TokenSchema)
+@app.post("/login", response_model=TokenSchema, tags=["Auth"])
 def login(data: LoginSchema, db: Session = Depends(get_db)):
     user = authenticate_user(db=db, username=data.username, password=data.password)
     if not user:
@@ -72,7 +72,7 @@ def login(data: LoginSchema, db: Session = Depends(get_db)):
     refresh_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(days=3600), "for": "refresh"})
     return {"access_token": access_token, "refresh_token": refresh_token}
 
-@app.post("/refresh", response_model=TokenSchema)
+@app.post("/refresh", response_model=TokenSchema, tags=["Auth"])
 def login(user: User = Depends(get_current_user_by_refresh_token)):
     access_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(hours=1), "for": "access"})
     refresh_token = create_token({"sub": user.username, "exp": datetime.utcnow() + timedelta(days=3600), "for": "refresh"})

@@ -3,7 +3,7 @@ from fastapi.routing import APIRouter
 from . import district, city, user_report, item_report, users
 
 
-router = APIRouter(prefix="/admin")
+router = APIRouter(prefix="/admin", tags=["Admin"])
 
 router.include_router(district.router)
 router.include_router(city.router)

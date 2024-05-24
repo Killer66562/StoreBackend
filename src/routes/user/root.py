@@ -16,7 +16,7 @@ from dependencies import get_db
 
 from schemas.general import UserSchema
 
-router = APIRouter(prefix="/user")
+router = APIRouter(prefix="/user", tags=["User"])
 
 router.include_router(store.router)
 router.include_router(order.router)
