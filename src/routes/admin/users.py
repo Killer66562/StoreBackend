@@ -4,6 +4,7 @@ from fastapi.routing import APIRouter
 
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import add_pagination, Page
+
 from sqlalchemy import desc, or_
 
 from dependencies import get_current_user, get_db
@@ -24,18 +25,19 @@ router = APIRouter(prefix="/users")
 def admin_get_users(query: UserQuerySchema = Depends(), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     users_query = db.query(User)
 
+    print(query.sort_by)
     if query.sort_by is not None:
-        if (query.sort_by == UserQuerySortByEnum.ID.value):
+        if (query.sort_by == UserQuerySortByEnum.ID):
             users_query = users_query.order_by(desc(User.id) if query.desc else User.id)
-        elif (query.sort_by == UserQuerySortByEnum.IS_ADMIN.value):
+        elif (query.sort_by == UserQuerySortByEnum.IS_ADMIN):
             users_query = users_query.order_by(desc(User.is_admin) if query.desc else User.is_admin)
-        elif (query.sort_by == UserQuerySortByEnum.USERNAME.value):
+        elif (query.sort_by == UserQuerySortByEnum.USERNAME):
             users_query = users_query.order_by(desc(User.username) if query.desc else User.username)
-        elif (query.sort_by == UserQuerySortByEnum.EMAIL.value):
+        elif (query.sort_by == UserQuerySortByEnum.EMAIL):
             users_query = users_query.order_by(desc(User.email) if query.desc else User.email)
-        elif (query.sort_by == UserQuerySortByEnum.BIRTHDAY.value):
+        elif (query.sort_by == UserQuerySortByEnum.BIRTHDAY):
             users_query = users_query.order_by(desc(User.birthday) if query.desc else User.birthday)
-        elif (query.sort_by == UserQuerySortByEnum.CREATED_AT.value):
+        elif (query.sort_by == UserQuerySortByEnum.CREATED_AT):
             users_query = users_query.order_by(desc(User.created_at) if query.desc else User.created_at)
         else:
             users_query = users_query.order_by(User.id)
@@ -54,7 +56,7 @@ def admin_get_users(query: UserQuerySchema = Depends(), user: User = Depends(get
     if query.created_at_start is not None:
         users_query = users_query.filter(User.birthday >= query.created_at_start)
 
-    if query.birthday_end is not None:
+    if query.created_at_end is not None:
         users_query = users_query.filter(User.birthday <= query.created_at_end)
 
     if query.username is not None:
@@ -69,9 +71,9 @@ def admin_get_users(query: UserQuerySchema = Depends(), user: User = Depends(get
     if query.email is not None:
         query_email_splited = query.email.split("|")
         users_query = users_query.filter(or_(*[
-            User.email.like(f"%{email}%") if email.startswith("*") and email.endswith("*") else \
-            User.email.like(f"%{email}") if email.startswith("*") else \
-            User.email.like(f"*{email}%") if email.endswith("*") else \
+            User.email.like(f"%{email.replace("*", "")}%") if email.startswith("*") and email.endswith("*") else \
+            User.email.like(f"%{email.replace("*", "")}") if email.startswith("*") else \
+            User.email.like(f"{email.replace("*", "")}%") if email.endswith("*") else \
             User.email == email for email in query_email_splited
         ]))
 
