@@ -6,11 +6,13 @@ from fastapi import Depends, Response
 from fastapi_pagination import Page, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
 
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
-from models import Item, Comment, User
+from enums import ItemQueryOrderByEnum
+from models import Item, Comment, Order, User
 
-from schemas.general import CommentSchema, FullCommentSchema, FullItemSchema, CUCommentSchema
+from schemas.general import CommentSchema, FullCommentSchema, FullItemSchema, CUCommentSchema, ItemQuerySchema
 
 from dependencies import  get_current_user, get_db
 
@@ -18,8 +20,28 @@ from dependencies import  get_current_user, get_db
 router = APIRouter(prefix="/items")
 
 @router.get("", response_model=Page[FullItemSchema], status_code=200)
-def get_items(db: Session = Depends(get_db)):
-    return paginate(db.query(Item))
+def get_items(query: ItemQuerySchema = Depends(), db: Session = Depends(get_db)):
+    items_query = db.query(Item)
+
+    if query.name:
+        names = query.name.split(" ")
+        items_query = items_query.filter(or_(*[Item.name.like(f"%{name}%") for name in names]))
+    
+    if query.order_by is not None:
+        if query.order_by == ItemQueryOrderByEnum.ID:
+            items_query = items_query.order_by(desc(Item.id) if query.desc is True else Item.id)
+        elif query.order_by == ItemQueryOrderByEnum.NAME:
+            items_query = items_query.order_by(desc(Item.name) if query.desc is True else Item.name)
+        elif query.order_by == ItemQueryOrderByEnum.STORE_ID:
+            items_query = items_query.order_by(desc(Item.store_id) if query.desc is True else Item.store_id)
+        elif query.order_by == ItemQueryOrderByEnum.HOTTEST:
+            pass
+        elif query.order_by == ItemQueryOrderByEnum.BEST:
+            pass
+    else:
+        items_query = items_query.order_by(desc(Item.id) if query.desc is True else Item.id)
+        
+    return paginate(items_query)
 
 @router.get("/hot", response_model=list[FullItemSchema], status_code=200)
 def get_items(db: Session = Depends(get_db)):

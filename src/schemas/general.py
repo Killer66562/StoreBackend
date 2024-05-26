@@ -2,6 +2,8 @@ from pydantic import BaseModel
 
 from datetime import datetime
 
+from enums import ItemQueryOrderByEnum
+
 
 class BaseResourceSchema(BaseModel):
     id: int
@@ -119,3 +121,9 @@ class FullBuyNextTimeItemSchema(BuyNextTimeItemSchema):
 
 class FullDistrictSchema(DistrictSchema):
     city: CitySchema
+
+
+class ItemQuerySchema(BaseModel):
+    name: str | None = None
+    order_by: ItemQueryOrderByEnum | None = None
+    desc: bool | None = None

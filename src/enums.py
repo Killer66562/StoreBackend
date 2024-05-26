@@ -22,3 +22,11 @@ class UserQuerySortByEnum(Enum):
     IS_ADMIN = "is_admin"
     BIRTHDAY = "birthday"
     CREATED_AT = "created_at"
+
+
+class ItemQueryOrderByEnum(Enum):
+    ID = "id"
+    NAME = "name"
+    STORE_ID = "store_id"
+    HOTTEST = "hottest"
+    BEST = "best"
