@@ -71,9 +71,9 @@ def admin_get_users(query: UserQuerySchema = Depends(), user: User = Depends(get
     if query.email is not None:
         query_email_splited = query.email.split("|")
         users_query = users_query.filter(or_(*[
-            User.email.like(f"%{email.replace("*", "")}%") if email.startswith("*") and email.endswith("*") else \
-            User.email.like(f"%{email.replace("*", "")}") if email.startswith("*") else \
-            User.email.like(f"{email.replace("*", "")}%") if email.endswith("*") else \
+            User.email.like(f"%{email.replace('*', '')}%") if email.startswith("*") and email.endswith("*") else \
+            User.email.like(f"%{email.replace('*', '')}") if email.startswith("*") else \
+            User.email.like(f"{email.replace('*', '')}%") if email.endswith("*") else \
             User.email == email for email in query_email_splited
         ]))
 
