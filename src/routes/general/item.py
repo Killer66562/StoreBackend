@@ -44,7 +44,7 @@ def get_items(query: ItemQuerySchema = Depends(), db: Session = Depends(get_db))
     return paginate(items_query)
 
 @router.get("/hot", response_model=list[FullItemSchema], status_code=200)
-def get_items(db: Session = Depends(get_db)):
+def get_hot_items(db: Session = Depends(get_db)):
     hot_items_raw = db.query(Item).outerjoin(Order, Order.item_id == Item.id).order_by(Order.count, Item.id).limit(1000).all()
     hot_items_raw_len = len(hot_items_raw)
     rand_k = 20 if hot_items_raw_len >= 20 else hot_items_raw_len
@@ -52,7 +52,7 @@ def get_items(db: Session = Depends(get_db)):
     return sorted(hot_items, key=lambda item : item.id, reverse=False)
 
 @router.get("/best", response_model=list[FullItemSchema], status_code=200)
-def get_items(db: Session = Depends(get_db)):
+def get_best_items(db: Session = Depends(get_db)):
     good_items_raw = db.query(Item).order_by(Item.id).limit(1000).all()
     good_items_raw_len = len(good_items_raw)
     rand_k = 20 if good_items_raw_len >= 20 else good_items_raw_len
