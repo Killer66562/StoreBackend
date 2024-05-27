@@ -107,6 +107,7 @@ class Order(Base):
     ] = mapped_column(Integer, unique=False, index=False, nullable=False, default=OrderStatus.NOT_DELIVERED.value)
 
     owner: Mapped["User"] = relationship("User", primaryjoin="User.id == Order.user_id", uselist=False, back_populates="orders")
+    item: Mapped["Item"] = relationship("Item", primaryjoin="Order.item_id == Item.id", uselist=False)
 
 
 class CartItem(Base):

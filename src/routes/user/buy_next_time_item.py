@@ -19,10 +19,10 @@ from enums import OrderStatus
 
 router = APIRouter(prefix="/liked_items")
 
-@router.get("", response_model=Page[FullBuyNextTimeItemSchema])
+@router.get("", response_model=list[FullBuyNextTimeItemSchema])
 def get_user_buy_next_time_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    user_buy_next_time_items_query = db.query(BuyNextTimeItem).filter(BuyNextTimeItem.user_id == user.id)
-    return paginate(user_buy_next_time_items_query)
+    user_buy_next_time_items = db.query(BuyNextTimeItem).filter(BuyNextTimeItem.user_id == user.id).all()
+    return user_buy_next_time_items
 
 @router.post("")
 def create_user_buy_next_time_item(data: CUBuyNextTimeItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):

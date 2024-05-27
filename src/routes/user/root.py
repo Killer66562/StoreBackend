@@ -4,9 +4,10 @@ from fastapi import Depends, Response, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
-from dependencies import get_current_user, get_db
+from dependencies import get_current_user, get_db, get_password_hash
 
 from models import User
 
@@ -14,7 +15,7 @@ from . import store, order, cart_item, buy_next_time_item
 
 from dependencies import get_db
 
-from schemas.general import UserSchema
+from schemas.general import RegisterSchema, UserSchema
 
 router = APIRouter(prefix="/user", tags=["User"])
 
@@ -28,6 +29,18 @@ def get_user_info(user: User = Depends(get_current_user)):
     return user
 
 @router.put("", response_model=UserSchema)
+def update_user_data(data: RegisterSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_exist = db.query(User).filter(User.id != user.id, or_(User.username == data.username, User.email == data.email)).first()
+    if user_exist:
+        return JSONResponse(content={"message": "重複的使用者名稱或電子郵件信箱"}, status_code=409)
+    user.username = data.username
+    user.email = data.email
+    if len(data.password) > 0:
+        user.password = get_password_hash(data.password)
+    db.commit()
+    return user
+
+@router.put("/icon", response_model=UserSchema)
 def update_user_icon(icon: UploadFile | None = None, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if icon is None:
         user.icon = None
@@ -35,7 +48,7 @@ def update_user_icon(icon: UploadFile | None = None, user: User = Depends(get_cu
         return Response(content=None, status_code=204)
     if icon.content_type != "image/jpeg" and icon.content_type != "image/png":
         return JSONResponse(content={"message": "只接受.jpeg和.png檔案"}, status_code=400)
-    if icon.size > 1024 * 1024:
+    if icon.size > 2048 * 2048:
         return JSONResponse(content={"message": "icon大小請勿超過1MB"}, status_code=400)
     icon.file.seek(0)
     filename = str(uuid.uuid4())
