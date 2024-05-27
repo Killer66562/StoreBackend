@@ -96,6 +96,8 @@ class Order(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="RESTRICT", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     count: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
+    address: Mapped[str] = mapped_column(String(length=200), unique=False, index=False, nullable=False)
+    note: Mapped[str] = mapped_column(String(length=100), unique=False, index=False, nullable=True, default=None)
     status: Mapped[
         Literal[
             OrderStatus.NOT_DELIVERED, 

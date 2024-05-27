@@ -23,7 +23,7 @@ router = APIRouter(prefix="/items")
 def get_items(query: ItemQuerySchema = Depends(), db: Session = Depends(get_db)):
     items_query = db.query(Item)
 
-    if query.name:
+    if query.name is not None:
         names = query.name.split(" ")
         items_query = items_query.filter(or_(*[Item.name.like(f"%{name}%") for name in names]))
     
@@ -85,7 +85,6 @@ def add_specific_item_comments(item_id: int, data: CUCommentSchema, user: User =
         comment = Comment(**data.model_dump(), user_id=user.id, item_id=item_id)
         db.add(comment)
     db.commit()
-    print(comment)
     return comment
 
 @router.get("/{item_id}/comments/{comment_id}", response_model=FullItemSchema)
