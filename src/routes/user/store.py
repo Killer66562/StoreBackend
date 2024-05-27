@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from models import Item, ItemImage, User, Store, District
 
 from schemas.user import CUStoreSchema, CUItemSchema
-from schemas.general import ItemSchema, StoreSchema
+from schemas.general import FullItemSchema, ItemSchema, StoreSchema
 
 from dependencies import get_current_user, get_db
 
@@ -88,13 +88,13 @@ def delete_user_store_icon(user: User = Depends(get_current_user), db: Session =
     db.commit()
     return Response(content=None, status_code=204)
 
-@router.get("/items", response_model=Page[ItemSchema], status_code=200)
+@router.get("/items", response_model=Page[FullItemSchema], status_code=200)
 def get_user_store_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.store:
         return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
     return paginate(db.query(Item).filter(Item.store_id == user.store.id))
 
-@router.post("/items", response_model=ItemSchema)
+@router.post("/items", response_model=FullItemSchema)
 def create_item_for_user_store(data: CUItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.store:
         return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
@@ -103,7 +103,7 @@ def create_item_for_user_store(data: CUItemSchema, user: User = Depends(get_curr
     db.commit()
     return item
 
-@router.put("/items/{item_id}", response_model=ItemSchema)
+@router.put("/items/{item_id}", response_model=FullItemSchema)
 def update_item_from_user_store(item_id: int, data: CUItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.store:
         return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)

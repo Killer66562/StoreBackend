@@ -61,3 +61,9 @@ def update_user_icon(icon: UploadFile | None = None, user: User = Depends(get_cu
     user.icon = filename
     db.commit()
     return Response(content=None, status_code=204)
+
+@router.delete("/icon")
+def delete_user_icon(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user.icon = None
+    db.commit()
+    return Response(content=None, status_code=204)
