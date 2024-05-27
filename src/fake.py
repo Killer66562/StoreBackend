@@ -8,6 +8,9 @@ from models import City, District, Store, User, Item
 
 from dependencies import get_db, get_password_hash
 
+def random_name_sm():
+    return "".join(choices([chr(_) for _ in range(65, 91)], k=10))
+
 def random_name():
     return "".join(choices([chr(_) for _ in range(65, 91)], k=20))
 
@@ -25,11 +28,11 @@ async def create_admin_user():
         member = User(id=11, username="member", password=get_password_hash("member123456"), email="member@gmail.com", birthday=datetime.now(), is_admin=False, is_verified=True)
         db.add(member)
 
-    cities = [City(name=random_name()) for _ in range(5)]
+    cities = [City(name=random_name_sm()) for _ in range(5)]
     db.add_all(cities)
     db.flush()
 
-    districts = [District(name=random_name(), city_id=city.id) for city in cities]
+    districts = [District(name=random_name_sm(), city_id=city.id) for city in cities]
     db.add_all(districts)
     db.flush()
 
