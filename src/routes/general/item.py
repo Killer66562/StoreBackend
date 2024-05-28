@@ -81,6 +81,7 @@ def add_specific_item_comments(item_id: int, data: CUCommentSchema, user: User =
     comment = db.query(Comment).filter(Comment.item_id == item_id, Comment.user_id == user.id).first()
     if comment:
         comment.content = data.content
+        comment.stars = data.stars
     else:
         comment = Comment(**data.model_dump(), user_id=user.id, item_id=item_id)
         db.add(comment)

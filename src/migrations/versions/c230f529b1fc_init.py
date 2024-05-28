@@ -1,8 +1,8 @@
 """Init
 
-Revision ID: 6a3e1e3712d9
+Revision ID: c230f529b1fc
 Revises: 
-Create Date: 2024-05-18 15:16:45.679027
+Create Date: 2024-05-28 19:03:41.372800
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6a3e1e3712d9'
+revision: str = 'c230f529b1fc'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -136,7 +136,8 @@ def upgrade() -> None:
     op.create_table('comments',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('item_id', sa.Integer(), nullable=False),
-    sa.Column('content', sa.String(length=200), nullable=False),
+    sa.Column('stars', sa.Integer(), nullable=False),
+    sa.Column('content', sa.String(length=200), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['item_id'], ['items.id'], onupdate='CASCADE', ondelete='CASCADE'),
@@ -169,6 +170,8 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('item_id', sa.Integer(), nullable=False),
     sa.Column('count', sa.Integer(), nullable=False),
+    sa.Column('address', sa.String(length=200), nullable=False),
+    sa.Column('note', sa.String(length=100), nullable=True),
     sa.Column('status', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),

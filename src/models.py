@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 from sqlalchemy import ForeignKey, String, Integer, Boolean, DateTime
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from datetime import datetime
 
@@ -82,6 +83,17 @@ class Item(Base):
     store: Mapped["Store"] = relationship("Store", primaryjoin="Store.id == Item.store_id", uselist=False, back_populates="items")
     images: Mapped[list["ItemImage"]] = relationship("ItemImage", primaryjoin="ItemImage.item_id == Item.id", uselist=True, back_populates="item", order_by="ItemImage.id")
     comments: Mapped[list["Comment"]] = relationship("Comment", primaryjoin="Comment.item_id == Item.id", uselist=True)
+
+    @hybrid_property
+    def comment_counts(self):
+        return len(self.comments)
+
+    @hybrid_property
+    def average_stars(self) -> float:
+        if self.comment_counts <= 0:
+            return 0
+        else:
+            return sum((comment.stars for comment in self.comments)) / self.comment_counts
 
 class ItemImage(Base):
     __tablename__ = "item_images"
@@ -169,6 +181,7 @@ class Comment(Base):
     __tablename__ = "comments"
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
     item_id: Mapped[int] = mapped_column(ForeignKey("items.id", ondelete="CASCADE", onupdate="CASCADE"), unique=False, index=False, nullable=False)
-    content: Mapped[str] = mapped_column(String(length=200), unique=False, index=False, nullable=False)
+    stars: Mapped[int] = mapped_column(Integer, unique=False, index=False, nullable=False)
+    content: Mapped[str] = mapped_column(String(length=200), unique=False, index=False, nullable=True, default=None)
 
     user: Mapped["User"] = relationship("User", primaryjoin="Comment.user_id == User.id", uselist=False)
