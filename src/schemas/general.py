@@ -47,11 +47,11 @@ class DistrictSchema(BaseResourceSchema):
 
 class CUCommentSchema(BaseModel):
     stars: int
-    content: str
+    content: str | None = None
 
 
 class CommentSchema(BaseResourceSchema):
-    content: str
+    content: str | None = None
     stars: int
     item_id: int
     user_id: int
@@ -78,7 +78,6 @@ class ItemSchema(BaseResourceSchema):
     price: int
     store_id: int
     average_stars: float
-    comment_counts: int
 
 
 class FullStoreSchema(StoreSchema):
@@ -96,8 +95,7 @@ class FullCommentSchema(CommentSchema):
 
 class FullItemSchema(ItemSchema):
     store: StoreSchema
-    images: list[ItemImageSchema] = []
-    comments: list[FullCommentSchema] = []
+    images: list[ItemImageSchema] = [],
 
 
 class FullCitySchema(CitySchema):
