@@ -24,6 +24,8 @@ class CUItemOptionSchema(BaseModel):
 
 
 class CUOrderSchema(BaseModel):
+    address: str
+    note: str | None = None
     item_id: int
     count: int
 

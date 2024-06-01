@@ -84,11 +84,6 @@ class FullStoreSchema(StoreSchema):
     items: list[ItemSchema] = []
 
 
-class OrderSchema(BaseResourceSchema):
-    item_id: int
-    count: int
-
-
 class FullCommentSchema(CommentSchema):
     user: UserSchema
 
@@ -129,3 +124,12 @@ class ItemQuerySchema(BaseModel):
     name: str | None = None
     order_by: ItemQueryOrderByEnum | None = None
     desc: bool | None = None
+
+
+class OrderSchema(BaseResourceSchema):
+    item_id: int
+    count: int
+    address: str
+    note: str | None = None
+    item: FullItemSchema
+    status: int
