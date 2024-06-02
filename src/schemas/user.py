@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from enums import OrderStatus
 
 class CUStoreSchema(BaseModel):
     name: str
@@ -50,3 +51,7 @@ class CUBuyNextTimeItemSchema(BaseModel):
 
 class CUUserIconSchema(BaseModel):
     icon: str | None
+
+
+class UserStoreOrderQuery(BaseModel):
+    status: OrderStatus | None = None

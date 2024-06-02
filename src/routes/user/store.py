@@ -4,16 +4,18 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from fastapi import Depends, Response, UploadFile
 
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from models import Item, ItemImage, User, Store, District
+from enums import OrderStatus
+from models import Item, ItemImage, Order, User, Store, District
 
-from schemas.user import CUStoreSchema, CUItemSchema
-from schemas.general import FullItemSchema, ItemSchema, StoreSchema
+from schemas.user import CUOrderSchema, CUStoreSchema, CUItemSchema
+from schemas.general import FullItemSchema, FullOrderSchema, ItemSchema, OrderSchema, StoreSchema
 
 from dependencies import get_current_user, get_db
 
-from fastapi_pagination import Page
+from fastapi_pagination import Page, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
 
 
@@ -225,3 +227,45 @@ def fully_update_item_images_from_user_store(item_id: int, images: list[UploadFi
         db.add_all(item_images)
     db.commit()
     return Response(content=None, status_code=204)
+
+@router.get("/orders", response_model=Page[FullOrderSchema])
+def get_store_orders(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not user.store:
+        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
+    orders_query = db.query(Order).join(Item, Order.item_id == Item.id).filter(Item.store_id == user.store.id).order_by(desc(Order.id), Order.status)
+    return paginate(orders_query)
+
+@router.put("/orders/{order_id}", response_model=FullOrderSchema)
+def update_store_order(order_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not user.store:
+        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        return JSONResponse(content={"message": "訂單不存在"}, status_code=404)
+    if order.item.store_id != user.store.id:
+        return JSONResponse(content={"message": "訂單不存在"}, status_code=404)
+    if order.item.count < order.count:
+        return JSONResponse(content={"message": "商品數量不足，請補貨。"}, status_code=400)
+    if order.status != OrderStatus.NOT_DELIVERED.value:
+        return JSONResponse(content={"message": "商品已出貨或已完成"}, status_code=400)
+    order.status = OrderStatus.PROCESSING.value
+    order.item.count = order.item.count - order.count
+    db.commit()
+    return order
+
+@router.delete("/orders/{order_id}")
+def delete_store_order(order_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not user.store:
+        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        return JSONResponse(content={"message": "訂單不存在"}, status_code=404)
+    if order.item.store_id != user.store.id:
+        return JSONResponse(content={"message": "訂單不存在"}, status_code=404)
+    if order.status != OrderStatus.NOT_DELIVERED.value:
+        return JSONResponse(content={"message": "商品已出貨或已完成"}, status_code=400)
+    db.delete(order)
+    db.commit()
+    return Response(status_code=204)
+
+add_pagination(router)

@@ -39,7 +39,7 @@ def get_items(query: ItemQuerySchema = Depends(), db: Session = Depends(get_db))
         elif query.order_by == ItemQueryOrderByEnum.BEST:
             pass
     else:
-        items_query = items_query.order_by(desc(Item.id) if query.desc is True else Item.id)
+        items_query = items_query.order_by(desc(Item.id))
         
     return paginate(items_query)
 

@@ -133,3 +133,7 @@ class OrderSchema(BaseResourceSchema):
     note: str | None = None
     item: FullItemSchema
     status: int
+
+
+class FullOrderSchema(OrderSchema):
+    owner: UserSchema
