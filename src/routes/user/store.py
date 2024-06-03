@@ -105,6 +105,15 @@ def create_item_for_user_store(data: CUItemSchema, user: User = Depends(get_curr
     db.commit()
     return item
 
+@router.get("/items/{item_id}", response_model=FullItemSchema)
+def get_item_from_user_store(item_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not user.store:
+        return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
+    item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
+    if not item:
+        return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
+    return item
+
 @router.put("/items/{item_id}", response_model=FullItemSchema)
 def update_item_from_user_store(item_id: int, data: CUItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not user.store:

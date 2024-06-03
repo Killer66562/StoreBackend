@@ -38,6 +38,7 @@ class CUCartItemSchema(BaseModel):
 
 class CUItemReportSchema(BaseModel):
     reported_item_id: int
+    reason: str
 
 
 class CUUserReportSchema(BaseModel):

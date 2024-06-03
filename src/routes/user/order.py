@@ -22,13 +22,14 @@ def get_user_owned_orders(user: User = Depends(get_current_user)):
 
 @router.post("", response_model=list[OrderSchema])
 def create_user_order(data: list[CUOrderSchema], user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    orders = []
     for order in data:
         item = db.query(Item).filter(Item.id == order.item_id).first()
         if not item:
             return JSONResponse(content={"message": "資源不存在"}, status_code=400)
         if user.store and item.store_id == user.store.id:
             return JSONResponse(content={"message": "你不能購買自己商店裡的物品"}, status_code=400)
-    orders = [Order(**order.model_dump(), user_id=user.id) for order in data]
+        orders.append(Order(**order.model_dump(), user_id=user.id, total_price=int(item.price*order.count)))
     db.add_all(orders)
     db.commit()
     return orders

@@ -130,6 +130,7 @@ class OrderSchema(BaseResourceSchema):
     item_id: int
     count: int
     address: str
+    total_price: int
     note: str | None = None
     item: FullItemSchema
     status: int
