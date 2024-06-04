@@ -4,7 +4,7 @@ from random import choice, choices
 
 from datetime import datetime
 
-from models import City, District, Store, User, Item
+from models import Ad, City, District, Store, User, Item
 
 from dependencies import get_db, get_password_hash
 
@@ -42,6 +42,10 @@ async def create_admin_user():
 
     stores = [Store(id=user.id, user_id=user.id, name=random_name(), district_id=choice(districts).id, introduction="Fake store") for user in users]
     db.add_all(stores)
+    db.flush()
+
+    ads = [Ad(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ", icon="midfing.gif") for _ in range(1000)]
+    db.add_all(ads)
     db.flush()
 
     items = []

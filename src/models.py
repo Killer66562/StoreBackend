@@ -186,3 +186,8 @@ class Comment(Base):
     content: Mapped[str] = mapped_column(String(length=200), unique=False, index=False, nullable=True, default=None)
 
     user: Mapped["User"] = relationship("User", primaryjoin="Comment.user_id == User.id", uselist=False)
+
+class Ad(Base):
+    __tablename__ = "ads"
+    url: Mapped[str] = mapped_column(String(length=500), unique=False, index=False, nullable=False)
+    icon: Mapped[str] = mapped_column(String(length=200), unique=False, index=False, nullable=True, default=None)

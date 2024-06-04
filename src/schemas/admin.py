@@ -56,3 +56,7 @@ class UserQuerySchema(BaseModel):
     is_admin: bool | None = None
     sort_by: UserQuerySortByEnum | None = None
     desc: bool | None = None
+
+
+class CUAdSchema(BaseModel):
+    url: str

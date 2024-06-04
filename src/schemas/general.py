@@ -138,3 +138,8 @@ class OrderSchema(BaseResourceSchema):
 
 class FullOrderSchema(OrderSchema):
     owner: UserSchema
+
+
+class AdSchema(BaseResourceSchema):
+    url: str
+    icon: str | None = None
