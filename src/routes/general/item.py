@@ -6,7 +6,7 @@ from fastapi import Depends, Response
 from fastapi_pagination import Page, add_pagination
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from sqlalchemy import desc, or_
+from sqlalchemy import Numeric, desc, func, or_
 from sqlalchemy.orm import Session
 
 from enums import ItemQueryOrderByEnum
@@ -35,9 +35,9 @@ def get_items(query: ItemQuerySchema = Depends(), db: Session = Depends(get_db))
         elif query.order_by == ItemQueryOrderByEnum.STORE_ID:
             items_query = items_query.order_by(desc(Item.store_id) if query.desc is True else Item.store_id)
         elif query.order_by == ItemQueryOrderByEnum.HOTTEST:
-            pass
+            items_query = items_query.order_by(Item.comment_counts if query.desc is True else desc(Item.comment_counts))
         elif query.order_by == ItemQueryOrderByEnum.BEST:
-            pass
+            items_query = items_query.order_by(Item.average_stars if query.desc is True else Item.average_stars)
     else:
         items_query = items_query.order_by(desc(Item.id))
         

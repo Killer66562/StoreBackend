@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
-from sqlalchemy import ForeignKey, String, Integer, Boolean, DateTime
+from sqlalchemy import ForeignKey, String, Integer, Boolean, DateTime, func, select, case
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from datetime import datetime
@@ -87,6 +87,10 @@ class Item(Base):
     @hybrid_property
     def comment_counts(self):
         return len(self.comments)
+    
+    @comment_counts.expression
+    def comment_counts(cls):
+        return select(func.count()).select_from(Comment.__table__).where(cls.id == Comment.item_id).as_scalar()
 
     @hybrid_property
     def average_stars(self) -> float:
@@ -94,6 +98,10 @@ class Item(Base):
             return 0
         else:
             return sum((comment.stars for comment in self.comments)) / self.comment_counts
+        
+    @average_stars.expression
+    def average_stars(cls) -> float:
+        return case((cls.comment_counts == 0, 0), else_=select(func.sum(Comment.content)).as_scalar() / cls.comment_counts)
 
 class ItemImage(Base):
     __tablename__ = "item_images"
