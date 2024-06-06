@@ -30,3 +30,4 @@ class ItemQueryOrderByEnum(Enum):
     STORE_ID = "store_id"
     HOTTEST = "hottest"
     BEST = "best"
+    PRICE = "price"

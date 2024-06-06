@@ -4,14 +4,14 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from fastapi import Depends, Response, UploadFile
 
-from sqlalchemy import desc
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
-from enums import OrderStatus
+from enums import ItemQueryOrderByEnum, OrderStatus
 from models import Item, ItemImage, Order, User, Store, District
 
 from schemas.user import CUOrderSchema, CUStoreSchema, CUItemSchema
-from schemas.general import FullItemSchema, FullOrderSchema, ItemSchema, OrderSchema, StoreSchema
+from schemas.general import FullItemSchema, FullOrderSchema, ItemQuerySchema, ItemSchema, OrderSchema, StoreSchema
 
 from dependencies import get_current_user, get_db
 
@@ -91,10 +91,31 @@ def delete_user_store_icon(user: User = Depends(get_current_user), db: Session =
     return Response(content=None, status_code=204)
 
 @router.get("/items", response_model=Page[FullItemSchema], status_code=200)
-def get_user_store_items(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_user_store_items(query: ItemQuerySchema = Depends(), user: User = Depends(get_current_user), db: Session = Depends(get_db)):      
     if not user.store:
         return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
-    return paginate(db.query(Item).filter(Item.store_id == user.store.id))
+    
+    items_query = db.query(Item).filter(Item.store_id == user.store.id)
+
+    if query.name is not None:
+        names = query.name.split(" ")
+        items_query = items_query.filter(or_(*[Item.name.like(f"%{name}%") for name in names]))
+
+    if query.order_by is not None:
+        if query.order_by == ItemQueryOrderByEnum.ID:
+            items_query = items_query.order_by(Item.id if query.desc is True else desc(Item.id))
+        elif query.order_by == ItemQueryOrderByEnum.NAME:
+            items_query = items_query.order_by(desc(Item.name) if query.desc is True else Item.name)
+        elif query.order_by == ItemQueryOrderByEnum.PRICE:
+            items_query = items_query.order_by(Item.price if query.desc is True else desc(Item.price))
+        elif query.order_by == ItemQueryOrderByEnum.HOTTEST:
+            items_query = items_query.order_by(desc(Item.comment_counts) if query.desc is True else Item.comment_counts)
+        elif query.order_by == ItemQueryOrderByEnum.BEST:
+            items_query = items_query.order_by(desc(Item.average_stars ) if query.desc is True else Item.average_stars)
+    else:
+        items_query = items_query.order_by(Item.id if query.desc is True else desc(Item.id))
+    
+    return paginate(items_query)
 
 @router.post("/items", response_model=FullItemSchema)
 def create_item_for_user_store(data: CUItemSchema, user: User = Depends(get_current_user), db: Session = Depends(get_db)):

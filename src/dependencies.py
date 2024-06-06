@@ -51,7 +51,7 @@ def authenticate_user(db: Session, username: str, password: str):
 def create_token(data: dict):
     return jwt.encode(data, settings.secret_key, algorithm=settings.algorithm)
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)):
+def get_user_no_exc(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)) -> User | None:
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         used_for: str = payload.get("for")
@@ -65,6 +65,24 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Session 
     except JWTError:
         raise UnauthenticatedException()
     user = db.query(User).filter(User.username == username).first()
+    return user
+
+def get_current_user(user: User | None = Depends(get_user_no_exc)) -> User:
+    '''
+    try:
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        used_for: str = payload.get("for")
+        if not used_for:
+            raise UnauthenticatedException()
+        if used_for != "access":
+            raise UnauthenticatedException()
+        username: str = payload.get("sub")
+        if not username:
+            raise UnauthenticatedException()
+    except JWTError:
+        raise UnauthenticatedException()
+    user = db.query(User).filter(User.username == username).first()
+    '''
     if not user:
         raise UnauthenticatedException()
     return user

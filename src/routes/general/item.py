@@ -1,3 +1,4 @@
+from datetime import datetime
 import random
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
@@ -14,32 +15,42 @@ from models import Item, Comment, Order, User
 
 from schemas.general import CommentSchema, FullCommentSchema, FullItemSchema, CUCommentSchema, ItemQuerySchema
 
-from dependencies import  get_current_user, get_db
+from dependencies import  get_current_user, get_db, get_user_no_exc
 
 
 router = APIRouter(prefix="/items")
 
 @router.get("", response_model=Page[FullItemSchema], status_code=200)
-def get_items(query: ItemQuerySchema = Depends(), db: Session = Depends(get_db)):
+def get_items(query: ItemQuerySchema = Depends(), user: User | None = Depends(get_user_no_exc), db: Session = Depends(get_db)):
     items_query = db.query(Item)
+
+    if user is not None:
+        if datetime.now().timestamp() - user.birthday.timestamp() < 86400 * 3650:
+            items_query = items_query.filter(Item.need_18 == False)
+        elif query.show_18 is None:
+            items_query = items_query.filter(Item.need_18 == False)           
+        else:
+            items_query = items_query.filter(Item.need_18 == query.show_18)
 
     if query.name is not None:
         names = query.name.split(" ")
         items_query = items_query.filter(or_(*[Item.name.like(f"%{name}%") for name in names]))
-    
+
     if query.order_by is not None:
         if query.order_by == ItemQueryOrderByEnum.ID:
-            items_query = items_query.order_by(desc(Item.id) if query.desc is True else Item.id)
+            items_query = items_query.order_by(Item.id if query.desc is True else desc(Item.id))
         elif query.order_by == ItemQueryOrderByEnum.NAME:
             items_query = items_query.order_by(desc(Item.name) if query.desc is True else Item.name)
         elif query.order_by == ItemQueryOrderByEnum.STORE_ID:
             items_query = items_query.order_by(desc(Item.store_id) if query.desc is True else Item.store_id)
+        elif query.order_by == ItemQueryOrderByEnum.PRICE:
+            items_query = items_query.order_by(Item.price if query.desc is True else desc(Item.price))
         elif query.order_by == ItemQueryOrderByEnum.HOTTEST:
-            items_query = items_query.order_by(Item.comment_counts if query.desc is True else desc(Item.comment_counts))
+            items_query = items_query.order_by(desc(Item.comment_counts) if query.desc is True else Item.comment_counts)
         elif query.order_by == ItemQueryOrderByEnum.BEST:
-            items_query = items_query.order_by(Item.average_stars if query.desc is True else Item.average_stars)
+            items_query = items_query.order_by(desc(Item.average_stars ) if query.desc is True else Item.average_stars)
     else:
-        items_query = items_query.order_by(desc(Item.id))
+        items_query = items_query.order_by(Item.id if query.desc is True else desc(Item.id))
         
     return paginate(items_query)
 

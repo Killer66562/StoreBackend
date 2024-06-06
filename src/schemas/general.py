@@ -124,6 +124,7 @@ class ItemQuerySchema(BaseModel):
     name: str | None = None
     order_by: ItemQueryOrderByEnum | None = None
     desc: bool | None = None
+    show_18: bool | None = None
 
 
 class OrderSchema(BaseResourceSchema):
