@@ -16,6 +16,7 @@ class UserSchema(BaseResourceSchema):
     birthday: datetime
     is_admin: bool
     is_verified: bool
+    is_18: bool
     icon: str | None = None
 
 
@@ -76,6 +77,7 @@ class ItemSchema(BaseResourceSchema):
     icon: str | None = None
     count: int
     price: int
+    need_18: bool
     store_id: int
     average_stars: float
 
@@ -124,7 +126,7 @@ class ItemQuerySchema(BaseModel):
     name: str | None = None
     order_by: ItemQueryOrderByEnum | None = None
     desc: bool | None = None
-    show_18: bool | None = None
+    need18: bool | None = None
 
 
 class OrderSchema(BaseResourceSchema):

@@ -56,14 +56,14 @@ def get_user_no_exc(token: Annotated[str, Depends(oauth2_scheme)], db: Session =
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
         used_for: str = payload.get("for")
         if not used_for:
-            raise UnauthenticatedException()
+            return None
         if used_for != "access":
-            raise UnauthenticatedException()
+            return None
         username: str = payload.get("sub")
         if not username:
-            raise UnauthenticatedException()
+            return None
     except JWTError:
-        raise UnauthenticatedException()
+        return None
     user = db.query(User).filter(User.username == username).first()
     return user
 

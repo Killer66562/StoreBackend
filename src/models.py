@@ -2,7 +2,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 from sqlalchemy import ForeignKey, String, Integer, Boolean, DateTime, func, select, case
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from typing import Literal
 
@@ -30,6 +30,10 @@ class User(Base):
     orders: Mapped[list["Order"]] = relationship("Order", primaryjoin="User.id == Order.user_id", uselist=True, back_populates="owner")
     cart_items: Mapped[list["CartItem"]] = relationship("CartItem", primaryjoin="User.id == CartItem.user_id", uselist=True, back_populates="owner")
     buy_next_time_items: Mapped[list["BuyNextTimeItem"]] = relationship("BuyNextTimeItem", primaryjoin="User.id == BuyNextTimeItem.user_id", uselist=True, back_populates="owner")
+
+    @hybrid_property
+    def is_18(self) -> bool:
+        return datetime.now() - self.birthday >= timedelta(days=6574)
 
 
 class Verification(Base):
@@ -101,7 +105,7 @@ class Item(Base):
         
     @average_stars.expression
     def average_stars(cls) -> float:
-        return case((cls.comment_counts == 0, 0), else_=select(func.sum(Comment.content)).as_scalar() / cls.comment_counts)
+        return case((cls.comment_counts == 0, 0), else_=select(func.sum(Comment.stars)).scalar_subquery() / cls.comment_counts)
 
 class ItemImage(Base):
     __tablename__ = "item_images"

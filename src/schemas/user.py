@@ -12,6 +12,7 @@ class CUItemSchema(BaseModel):
     introduction: str
     count: int
     price: int
+    need_18: bool
 
 
 class CUItemOptionTitleSchema(BaseModel):

@@ -105,13 +105,13 @@ def get_user_store_items(query: ItemQuerySchema = Depends(), user: User = Depend
         if query.order_by == ItemQueryOrderByEnum.ID:
             items_query = items_query.order_by(Item.id if query.desc is True else desc(Item.id))
         elif query.order_by == ItemQueryOrderByEnum.NAME:
-            items_query = items_query.order_by(desc(Item.name) if query.desc is True else Item.name)
+            items_query = items_query.order_by(desc(Item.name) if query.desc is True else Item.name).order_by(Item.id if query.desc is True else desc(Item.id))
         elif query.order_by == ItemQueryOrderByEnum.PRICE:
-            items_query = items_query.order_by(Item.price if query.desc is True else desc(Item.price))
+            items_query = items_query.order_by(Item.price if query.desc is True else desc(Item.price)).order_by(Item.id if query.desc is True else desc(Item.id))
         elif query.order_by == ItemQueryOrderByEnum.HOTTEST:
-            items_query = items_query.order_by(desc(Item.comment_counts) if query.desc is True else Item.comment_counts)
+            items_query = items_query.order_by(desc(Item.comment_counts) if query.desc is True else Item.comment_counts).order_by(Item.id if query.desc is True else desc(Item.id))
         elif query.order_by == ItemQueryOrderByEnum.BEST:
-            items_query = items_query.order_by(desc(Item.average_stars ) if query.desc is True else Item.average_stars)
+            items_query = items_query.order_by(desc(Item.average_stars ) if query.desc is True else Item.average_stars).order_by(Item.id if query.desc is True else desc(Item.id))
     else:
         items_query = items_query.order_by(Item.id if query.desc is True else desc(Item.id))
     
@@ -157,6 +157,9 @@ def delete_item_from_user_store(item_id: int, user: User = Depends(get_current_u
     item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
     if not item:
         return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
+    order_exist = db.query(Order).filter(Order.item_id == item_id, Order.status != OrderStatus.DONE.value).first()
+    if order_exist:
+        return JSONResponse(content={"message": "尚有包含本商品且未完成的訂單"}, status_code=400)
     db.delete(item)
     db.commit()
     return Response(content=None, status_code=204)
