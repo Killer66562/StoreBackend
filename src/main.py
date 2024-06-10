@@ -81,4 +81,4 @@ def login(user: User = Depends(get_current_user_by_refresh_token)):
 add_pagination(app)
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", reload=True, host=settings.app_host, port=settings.app_port)
+    uvicorn.run("main:app", reload=True, host=settings.app_host, port=settings.app_port, ssl_certfile=settings.ssl_certfile, ssl_keyfile=settings.ssl_keyfile)

@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     secret_key: str = "85c6b39014086ded16f58b0c582ef5a5167b0bdc891b45cc7bc3094bd57f47a3"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+
+    ssl_certfile: str | None = None
+    ssl_keyfile: str | None = None
     
 
 settings = Settings()
