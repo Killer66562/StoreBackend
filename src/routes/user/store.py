@@ -8,7 +8,7 @@ from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
 from enums import ItemQueryOrderByEnum, OrderStatus
-from models import Item, ItemImage, Order, User, Store, District
+from models import BuyNextTimeItem, CartItem, Item, ItemImage, Order, User, Store, District
 
 from schemas.user import CUOrderSchema, CUStoreSchema, CUItemSchema
 from schemas.general import FullItemSchema, FullOrderSchema, ItemQuerySchema, ItemSchema, OrderSchema, StoreSchema
@@ -146,6 +146,7 @@ def update_item_from_user_store(item_id: int, data: CUItemSchema, user: User = D
     item.introduction = data.introduction
     item.count = data.count
     item.price = data.price
+    item.need_18 = data.need_18
     db.commit()
     return item
 
@@ -157,6 +158,12 @@ def delete_item_from_user_store(item_id: int, user: User = Depends(get_current_u
     item = db.query(Item).filter(Item.id == item_id, Item.store_id == user.store.id).first()
     if not item:
         return JSONResponse(content={"message": "資源不存在或無權存取"}, status_code=400)
+    liked_item_exist = db.query(BuyNextTimeItem).filter(BuyNextTimeItem.item_id == item_id).first()
+    if liked_item_exist:
+        return JSONResponse(content={"message": "尚有用戶的願望清單包含本商品"}, status_code=400)
+    cart_item_exist = db.query(CartItem).filter(CartItem.item_id == item_id).first()
+    if cart_item_exist:
+        return JSONResponse(content={"message": "尚有用戶的購物車包含本商品"}, status_code=400)
     order_exist = db.query(Order).filter(Order.item_id == item_id, Order.status != OrderStatus.DONE.value).first()
     if order_exist:
         return JSONResponse(content={"message": "尚有包含本商品且未完成的訂單"}, status_code=400)

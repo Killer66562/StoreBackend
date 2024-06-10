@@ -9,12 +9,10 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 
 from models import CartItem, Item, Order, User, Store, District
 
-from schemas.user import CUOrderSchema, CUCartItemSchema
+from schemas.user import CUCartItemSchema
 from schemas.general import FullCartItemSchema
 
 from dependencies import get_current_user, get_db
-
-from enums import OrderStatus
 
 
 router = APIRouter(prefix="/cart_items")
