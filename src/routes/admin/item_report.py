@@ -4,6 +4,7 @@ from fastapi.routing import APIRouter
 
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import add_pagination, Page
+from sqlalchemy import desc
 
 from dependencies import get_current_user, get_db
 
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/item_reports")
 
 @router.get("", response_model=Page[ItemReportSchema])
 def get_all_item_reports(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    item_reports_query = db.query(ItemReport)
+    item_reports_query = db.query(ItemReport).order_by(desc(ItemReport.id))
     return paginate(item_reports_query)
 
 @router.get("/{item_report_id}", response_model=ItemReportSchema)

@@ -36,6 +36,7 @@ class ItemRepoertImageSchema(BaseResourceSchema):
 class ItemReportSchema(BaseResourceSchema):
     reporter_id: int
     reported_item_id: int
+    reason: str
     reporter: UserSchema
     reported_item: ItemSchema
     images: list[ItemRepoertImageSchema]

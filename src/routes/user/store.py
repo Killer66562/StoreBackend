@@ -8,7 +8,7 @@ from sqlalchemy import desc, or_
 from sqlalchemy.orm import Session
 
 from enums import ItemQueryOrderByEnum, OrderStatus
-from models import BuyNextTimeItem, CartItem, Item, ItemImage, Order, User, Store, District
+from models import BuyNextTimeItem, CartItem, Item, ItemImage, ItemReport, Order, User, Store, District
 
 from schemas.user import CUOrderSchema, CUStoreSchema, CUItemSchema
 from schemas.general import FullItemSchema, FullOrderSchema, ItemQuerySchema, ItemSchema, OrderSchema, StoreSchema
@@ -167,6 +167,11 @@ def delete_item_from_user_store(item_id: int, user: User = Depends(get_current_u
     order_exist = db.query(Order).filter(Order.item_id == item_id, Order.status != OrderStatus.DONE.value).first()
     if order_exist:
         return JSONResponse(content={"message": "尚有包含本商品且未完成的訂單"}, status_code=400)
+    item_reports = db.query(ItemReport).filter(ItemReport.reported_item_id == item_id).all()
+
+    for item_report in item_reports:
+        db.delete(item_report)
+        
     db.delete(item)
     db.commit()
     return Response(content=None, status_code=204)
