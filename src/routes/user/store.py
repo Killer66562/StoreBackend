@@ -35,6 +35,9 @@ def create_user_store(data: CUStoreSchema, user: User = Depends(get_current_user
         return JSONResponse(content={"message": "你已經創建了一個商店"}, status_code=409)
     if not db.query(District).filter(District.id == data.district_id).first():
         return JSONResponse(content={"message": "該區域不存在"}, status_code=400)
+    store_exist = db.query(Store).filter(Store.name == data.name).first()
+    if store_exist:
+        return JSONResponse(content={"message": "已存在同名的商店"}, status_code=409)
     store = Store(**data.model_dump(), user_id=user.id)
     db.add(store)
     db.commit()
@@ -47,6 +50,9 @@ def update_user_store(data: CUStoreSchema, user: User = Depends(get_current_user
         return JSONResponse(content={"message": "你尚未創建商店"}, status_code=400)
     if not db.query(District).filter(District.id == data.district_id).first():
         return JSONResponse(content={"message": "該區域不存在"}, status_code=400)
+    store_exist = db.query(Store).filter(Store.id != user.store.id, Store.name == data.name).first()
+    if store_exist:
+        return JSONResponse(content={"message": "已存在同名的商店"}, status_code=409)
     user.store.name = data.name
     user.store.introduction = data.introduction
     user.store.district_id = data.district_id
