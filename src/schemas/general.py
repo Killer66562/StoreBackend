@@ -146,3 +146,11 @@ class FullOrderSchema(OrderSchema):
 class AdSchema(BaseResourceSchema):
     url: str
     icon: str | None = None
+
+
+class CUForgetPwSchema(BaseModel):
+    email: str
+
+
+class ForgetPwCodeConfirmSchema(BaseModel):
+    code: str
