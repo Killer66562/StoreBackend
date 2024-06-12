@@ -38,7 +38,7 @@ class User(Base):
 
 class Verification(Base):
     __tablename__ = "verifications"
-    code: Mapped[str] = mapped_column(String(length=5), unique=False, index=False, nullable=False)
+    code: Mapped[str] = mapped_column(String(length=50), unique=False, index=False, nullable=False)
     last_request: Mapped[datetime] = mapped_column(DateTime, unique=False, index=False, nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE", onupdate="CASCADE"), unique=True, index=True, nullable=False)
 
