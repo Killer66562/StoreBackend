@@ -19,7 +19,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from dependencies import get_db, get_password_hash, authenticate_user, create_token, get_current_user_by_refresh_token
 
-from exceptions import UnauthenticatedException
+from exceptions import PermissionException, UnauthenticatedException
+
 from routes import user as user_route
 from routes import admin as admin_route
 from routes import general as general_route
@@ -64,6 +65,10 @@ mail_conf = ConnectionConfig(
 @app.exception_handler(UnauthenticatedException)
 def unauthenciated_handler(request, exc):
     return JSONResponse(content={"message": "身分驗證失敗，請重新登入。"}, status_code=401)
+
+@app.exception_handler(PermissionException)
+def unauthenciated_handler(request, exc):
+    return JSONResponse(content={"message": "身分驗證失敗，請重新登入。"}, status_code=403)
 
 @app.exception_handler(Exception)
 def any_exception_handler(request, exc):

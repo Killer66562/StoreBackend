@@ -1,9 +1,12 @@
+from fastapi import Depends
 from fastapi.routing import APIRouter
 
 from . import district, city, user_report, item_report, users, ad
 
+from dependencies import get_current_admin_user
 
-router = APIRouter(prefix="/admin", tags=["Admin"])
+
+router = APIRouter(prefix="/admin", tags=["Admin"], dependencies=[Depends(get_current_admin_user)])
 
 router.include_router(district.router)
 router.include_router(city.router)
