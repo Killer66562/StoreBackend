@@ -27,3 +27,6 @@
     ```bash
     python main.py
     ```
+
+## 連結
+購物網站前端：https://github.com/Killer66562/StoreFrontendRenew
