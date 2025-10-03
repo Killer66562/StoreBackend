@@ -8,7 +8,7 @@
     ```
 2. 安裝依賴：
     ```bash
-    pip install requirements.txt
+    pip install -r requirements.txt
     ```
     或者
     ```bash
