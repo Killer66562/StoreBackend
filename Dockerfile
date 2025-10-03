@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -11,4 +11,4 @@ COPY src /app
 
 EXPOSE 8000
 
-CMD [ "/bin/bash", "-c", "alembic upgrade head; python fake.py; python main.py" ]
+CMD [ "/bin/bash", "-c", "alembic upgrade head; python create_admin.py; python main.py" ]
